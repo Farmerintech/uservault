@@ -54,7 +54,12 @@ export const Login = () => {
       });
       const data = await res.json();
       console.log(data)
+      //   if(data.message == "User is already verified"){
+      //   setMsg(``);
+      // }
+
       setMsg(data.message)
+      
       if (!res.ok) throw new Error();
 
       
@@ -71,7 +76,24 @@ export const Login = () => {
   };
 
   /* ================= UI ================= */
-
+  const handleVerifyNow = async () =>{
+        try {
+      const res = await fetch(`${BaseURL}/auth/resend_otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({email:form.email}),
+      });
+      const data = await res.json();
+      console.log(data)
+      setMsg(data.message);
+      navigate(`/confirm-otp?email=${form.email}`);
+      if (!res.ok) throw new Error();
+    }catch {
+      error("Invalid credentials or network error");
+    } finally {
+      setIsLoading(false);
+    }
+  }
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
 
@@ -117,7 +139,29 @@ export const Login = () => {
               {msg}
             </p>
           )}
+          {
+            msg ==="This email is not yet verified" && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-white rounded-xl p-8 max-w-sm text-center shadow-2xl">
+            <h3 className="text-2xl font-bold mb-4 text-green-600">
+              Email Not Yet Verified!
+            </h3>
+            <p className="text-gray-700 mb-6">
+              {msg}
+            </p>
+            <button
+            onClick={()=>handleVerifyNow}
+              className="px-6 py-2 bg-[#46B35C] text-white rounded-lg hover:bg-green-600 font-semibold"
+            >Verify now
+                  {/* <Link to={`/confirm_email?email=${form.email}`}>Verify now</Link> */}
 
+              
+            </button>
+          </div>
+        </div>
+          
+            )
+          }
           {/* Email */}
           <div className="mb-5">
             <label className="text-sm mb-1 block">

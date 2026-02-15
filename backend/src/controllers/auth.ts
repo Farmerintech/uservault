@@ -58,8 +58,9 @@ export const createUser = async (
     /* ---------------- HASH PASSWORD ---------------- */
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-const otp = generateOTP(); // e.g. "482913"
-      const html = getOtpEmailHTML(otp);
+    const otp = generateOTP(); // e.g. "482913"
+    const html = getOtpEmailHTML(otp);
+
     /* ---------------- CREATE USER ---------------- */
     const user = await users.create({
       username,
@@ -70,7 +71,7 @@ const otp = generateOTP(); // e.g. "482913"
     
 
 
-    SendMail("yakubshakirudeenolaide2018@gmail.com", "Your UserVault OTP", html)
+    SendMail(email, "Your UserVault OTP", html)
     /* ---------------- RESPONSE ---------------- */
     res.status(201).json({
       success: true,
@@ -141,6 +142,14 @@ export const loginUser = async (
       res.status(401).json({
         success: false,
         message: "Invalid email or password",
+      });
+      return;
+    }
+    const isVerified = user.isVerified;
+    if(!isVerified){
+       res.status(401).json({
+        success: false,
+        message: "This email is not yet verified",
       });
       return;
     }
@@ -218,33 +227,14 @@ export const forgotPassword = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "No account with this email" });
 
     // Generate OTP
-    const otp = generateOTP();
+     const otp = generateOTP(); // e.g. "482913"
+    const html = getOtpEmailHTML(otp);
     user.resetOTP = otp;
     user.resetOTPExpire = new Date(Date.now() + 10 * 60 * 1000); // valid 10 minutes
     await user.save();
 
-    // Send OTP via email
-    // const transporter = nodemailer.createTransport({
-    //   service: "gmail",
-    //   auth: {
-    //     user: process.env.EMAIL_USER,
-    //     pass: process.env.EMAIL_PASS,
-    //   },
-    // });
+  SendMail(email, "Password reset OTP", html)
 
-    // const html = `
-    //   <p>Hello ${user.username},</p>
-    //   <p>Your OTP to reset password is:</p>
-    //   <h2>${otp}</h2>
-    //   <p>It expires in 10 minutes.</p>
-    // `;
-
-    // await transporter.sendMail({
-    //   from: `"UserVault" <${process.env.EMAIL_USER}>`,
-    //   to: user.email,
-    //   subject: "UserVault Password Reset OTP",
-    //   html,
-    // });
 
     res.json({ message: "OTP sent to your email" });
   } catch (err: any) {
@@ -312,3 +302,43 @@ export const verifyOtp = async (req: VerifyOtpRequest, res: Response) => {
     return res.status(500).json({ message: err.message });
   }
 };
+
+
+export const resendOtp = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await users.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: "User is already verified" });
+    }
+
+    // Generate new OTP
+    const otp = generateOTP();
+
+    // Optional: prepare email HTML
+    const html = getOtpEmailHTML(otp);
+
+    // Update user OTP and save
+    user.otp = otp;
+    await user.save();
+
+    // TODO: send the OTP via email here
+
+    return res.status(200).json({ message: "OTP resent successfully" });
+  } catch (error) {
+    console.error("Error resending OTP:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
