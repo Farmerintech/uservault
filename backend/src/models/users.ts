@@ -3,26 +3,21 @@ import bcrypt from "bcrypt";
 import { NextFunction } from "express";
 
 export interface IUser extends Document {
-  firstName: string;
-  lastName: string;
+  username: string;
   email: string;
   password: string;
-  gender: string;
   otp?: string;
   access_code?:string;
+  resetOTPExpire?:any;
+  resetOTP?:string;
+  isVerified?:boolean;
   files: mongoose.Types.ObjectId[];
   comparePassword(password: string): Promise<boolean>;
 }
 
 const UserSchema: Schema = new Schema(
   {
-    firstName: {
-      type: String,
-      required: true,
-      trim: true
-    },
-
-    lastName: {
+    username: {
       type: String,
       required: true,
       trim: true
@@ -39,19 +34,19 @@ const UserSchema: Schema = new Schema(
       type: String,
       required: true
     },
-
-    gender: {
-      type: String,
-      enum: ["male", "female", "other"],
-      required: true
+    resetOTPExpire:{
+      type:String
     },
-
+    resetOTP:{
+      type:String
+},
     otp: {
       type: String
     },
     access_code:{
         type:String
     },
+    isVerified:{type:Boolean, default:false},
     files: [
       {
         type: mongoose.Schema.Types.ObjectId,

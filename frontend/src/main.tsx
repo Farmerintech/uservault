@@ -6,14 +6,18 @@ import { SignUp } from './pages/signup'
 import { DashMenu } from './components/dash-menu'
 import { Dashboard } from './pages/dashboard'
 import { Login } from './pages/signin'
+import Home from './pages/Home'
+import { OTPVerification } from './pages/otp'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
     <Routes>
+      <Route path="/" element={<Home />} />
       <Route path="/signup" element={<SignUp />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/" element={<Dashboard />} />
+            <Route path="/confirm_email" element={<OTPVerification />} />
+      <Route path="/signin" element={<Login />} />
+      <Route path="/dashbaord" element={<Dashboard />} />
       <Route path="/dashboard" element={<DashMenu />} />
     </Routes>
   </BrowserRouter>  

@@ -4,7 +4,20 @@ import users from "../models/users";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { SignOptions} from "jsonwebtoken";
+import { SendMail } from "../utils/nodemail";
+import { generateOTP } from "../utils/generateOtp";
+import { getOtpEmailHTML } from "../utils/html";
+import { Document } from "mongoose";
 
+export interface AuthUser {
+  id: string;
+  email: string;
+  username: string;
+}
+
+export interface AuthRequest extends Request {
+  user?: AuthUser;
+}
 /**
  * @desc    Create New User
  * @route   POST /api/users
@@ -29,7 +42,7 @@ export const createUser = async (
       return;
     }
 
-    const { firstName, lastName, email, password, gender } = value;
+    const { username, email, password,  } = value;
 
     /* ---------------- CHECK IF USER EXISTS ---------------- */
     const existingUser = await users.findOne({ email });
@@ -45,28 +58,30 @@ export const createUser = async (
     /* ---------------- HASH PASSWORD ---------------- */
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
+const otp = generateOTP(); // e.g. "482913"
+      const html = getOtpEmailHTML(otp);
     /* ---------------- CREATE USER ---------------- */
     const user = await users.create({
-      firstName,
-      lastName,
+      username,
       email,
       password: hashedPassword,
-      gender,
+      otp:otp,
     });
+    
 
+
+    SendMail("yakubshakirudeenolaide2018@gmail.com", "Your UserVault OTP", html)
     /* ---------------- RESPONSE ---------------- */
     res.status(201).json({
       success: true,
       message: "User created successfully",
       data: {
         id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        username: user.username,
         email: user.email,
-        gender: user.gender,
       },
     });
+
   } catch (error) {
     console.error("Create User Error:", error);
 
@@ -152,8 +167,7 @@ export const loginUser = async (
       token,
       user: {
         id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        username: user.username,
         email: user.email,
       },
     });
@@ -164,5 +178,137 @@ export const loginUser = async (
       success: false,
       message: "Server error",
     });
+  }
+};
+
+
+
+
+
+// ================= CHANGE PASSWORD =================
+export const changePassword = async (req: AuthRequest, res: Response) => {
+  const userId = req.user?.id; // Assume user is authenticated and user ID is in req.user
+  const { oldPassword, newPassword } = req.body;
+
+  try {
+    const user = await users.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch)
+      return res.status(400).json({ message: "Old password is incorrect" });
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: "Password changed successfully" });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+// ================= FORGOT PASSWORD (SEND OTP) =================
+export const forgotPassword = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  try {
+    const user = await users.findOne({ email });
+    if (!user)
+      return res.status(404).json({ message: "No account with this email" });
+
+    // Generate OTP
+    const otp = generateOTP();
+    user.resetOTP = otp;
+    user.resetOTPExpire = new Date(Date.now() + 10 * 60 * 1000); // valid 10 minutes
+    await user.save();
+
+    // Send OTP via email
+    // const transporter = nodemailer.createTransport({
+    //   service: "gmail",
+    //   auth: {
+    //     user: process.env.EMAIL_USER,
+    //     pass: process.env.EMAIL_PASS,
+    //   },
+    // });
+
+    // const html = `
+    //   <p>Hello ${user.username},</p>
+    //   <p>Your OTP to reset password is:</p>
+    //   <h2>${otp}</h2>
+    //   <p>It expires in 10 minutes.</p>
+    // `;
+
+    // await transporter.sendMail({
+    //   from: `"UserVault" <${process.env.EMAIL_USER}>`,
+    //   to: user.email,
+    //   subject: "UserVault Password Reset OTP",
+    //   html,
+    // });
+
+    res.json({ message: "OTP sent to your email" });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ================= RESET PASSWORD USING OTP =================
+export const resetPassword = async (req: Request, res: Response) => {
+  const { email, otp, newPassword } = req.body;
+
+  try {
+    const user = await users.findOne({
+      email,
+      resetOTP: otp,
+      resetOTPExpire: { $gt: new Date() },
+    });
+
+    if (!user)
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+
+    user.password = newPassword;
+    user.resetOTP = undefined;
+    user.resetOTPExpire = undefined;
+    await user.save();
+
+    res.json({ message: "Password reset successfully" });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+
+
+interface VerifyOtpRequest extends Request {
+  body: {
+    email: string;
+    otp: string;
+  };
+}
+
+// ================= VERIFY OTP DURING REGISTRATION =================
+export const verifyOtp = async (req: VerifyOtpRequest, res: Response) => {
+  const { email, otp } = req.body;
+
+  try {
+    const user = await users.findOne({ email });
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.isVerified)
+      return res.status(400).json({ message: "User is already verified" });
+
+    if (user.otp !== otp)
+      return res.status(400).json({ message: "Invalid OTP" });
+
+    // If OTP matches, update user
+    user.isVerified = true;
+    user.otp = undefined; // clear OTP
+    await user.save();
+
+    return res.json({ message: "Account verified successfully" });
+  } catch (err: any) {
+    return res.status(500).json({ message: err.message });
   }
 };
