@@ -66,10 +66,11 @@ export default function Header() {
 
             <div className="pt-4 flex flex-col space-y-3 border-t border-slate-800">
               <button className="py-2 rounded-lg border border-slate-700 hover:border-green-500">
-                Login
+                <Link to="/signin" className="text-white">Login</Link>
+
               </button>
               <button className="py-2 rounded-lg bg-[#46B35C] hover:bg-green-600">
-                Get Started
+              <Link to="/signup" className="text-white">Get Started</Link>
               </button>
             </div>
           </nav>
