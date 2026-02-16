@@ -56,6 +56,7 @@ export const Dashboard = () => {
 
     return (
         <>
+        <p>{msg && msg}</p>
             <section className={` ${state.theme === "light" ? "bg-stone-50 text-black" : "bg-gray-700 text-white"} h-[full] hidden md:flex justify-between min-h-screen`}>
                 <DashMenu />
                 <Main />
