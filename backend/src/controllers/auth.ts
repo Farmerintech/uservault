@@ -252,7 +252,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     await user.save();
 
     const encryptedOtp = encryptData(otp);
-    const resetLink = `https://uservault.com/reset_password?email=${email}&resetId=${encryptedOtp}`;
+    const resetLink = `https://uservault-two.vercel.app/reset_password?email=${email}&resetId=${encryptedOtp}`;
     const html = `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`;
     await SendMail(email, "Password Reset Link", html);
 
