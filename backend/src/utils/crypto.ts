@@ -10,10 +10,10 @@ const secretKey = Buffer.from(
 
 // Must be 16 bytes
 const ivLength = 16;
-
+console.log(process.env.ENCRYPT_SECRET)
 /* ================= ENCRYPT ================= */
 export const encryptData = (text: string): string => {
-  if (!secretKey || secretKey.length !== 32) {
+  if (!secretKey) {
     throw new Error("Invalid ENCRYPT_SECRET length (must be 32 chars)");
   }
 
