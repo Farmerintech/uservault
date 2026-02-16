@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken"
 import { SignOptions} from "jsonwebtoken";
 import { SendMail } from "../utils/nodemail";
 import { generateOTP } from "../utils/generateOtp";
-import { getOtpEmailHTML } from "../utils/html";
+import { getOtpEmailHTML, Resethtml } from "../utils/html";
 import { Document } from "mongoose";
 import { decryptData, encryptData } from "../utils/crypto";
 
@@ -253,7 +253,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
     const encryptedOtp = encryptData(otp);
     const resetLink = `https://uservault-two.vercel.app/reset_password?email=${email}&resetId=${encryptedOtp}`;
-    const html = `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`;
+    // const html = `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`;
+    const html =Resethtml(resetLink)
     await SendMail(email, "Password Reset Link", html);
 
     return res.json({ message: "Reset link sent to your email" });
