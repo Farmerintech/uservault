@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from "react-router";
 import { BaseURL } from "../components/api";
 
 export const ResetPassword = () => {
-  const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [msg, setMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -12,7 +11,7 @@ export const ResetPassword = () => {
 
   const [searchParams] = useSearchParams();
   const emailFromQuery = searchParams.get("email") || "";
-  const resetId =  searchParams.get("resetId") || "";
+  const resetId = searchParams.get("resetId") || "";
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,8 +19,8 @@ export const ResetPassword = () => {
     setMsg("");
     setIsLoading(true);
 
-    if (!oldPassword || !resetId ) {
-      setMsg("Both fields are required");
+    if (!newPassword || !resetId) {
+      setMsg("New password is required");
       setIsLoading(false);
       return;
     }
@@ -32,14 +31,13 @@ export const ResetPassword = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: emailFromQuery,
-          resetId, 
-          newPassword 
+          resetId,
+          newPassword,
         }),
       });
 
       const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message || "Password change failed");
+      if (!res.ok) throw new Error(data.message || "Password reset failed");
 
       setShowModal(true);
     } catch (err: any) {
@@ -61,43 +59,22 @@ export const ResetPassword = () => {
         className="absolute inset-0 bg-cover bg-center scale-110 blur-sm"
         style={{ backgroundImage: `url(${bgImage})` }}
       />
-
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black/50" />
 
       {/* Glass Card */}
       <div className="relative z-10 w-full max-w-md px-6">
         <form
           onSubmit={handleSubmit}
-          className="
-            backdrop-blur-xl
-            bg-white/10
-            border border-white/20
-            shadow-2xl
-            rounded-2xl
-            p-8
-            text-white
-          "
+          className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-2xl p-8 text-white"
         >
           <div className="mb-8 text-center">
             <h2 className="text-3xl font-bold">Reset Password</h2>
             <p className="text-white/70 mt-2">
-              Enter your old and new password to reset your account
+              Enter a new password to reset your account
             </p>
           </div>
 
-          {msg && (
-            <p className="text-red-400 text-sm mb-4 text-center">{msg}</p>
-          )}
-
-          <input
-            type="password"
-            name="oldPassword"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            placeholder="Old Password"
-            className="input-glass mb-4"
-          />
+          {msg && <p className="text-red-400 text-sm mb-4 text-center">{msg}</p>}
 
           <input
             type="password"
@@ -110,22 +87,14 @@ export const ResetPassword = () => {
 
           <button
             disabled={isLoading}
-            className="
-              w-full py-2.5 rounded-lg
-              bg-[#46B35C]
-              hover:bg-green-600
-              font-semibold
-              transition
-              disabled:opacity-60
-              mb-4
-            "
+            className="w-full py-2.5 rounded-lg bg-[#46B35C] hover:bg-green-600 font-semibold transition disabled:opacity-60 mb-4"
           >
             {isLoading ? "Updating..." : "Reset Password"}
           </button>
         </form>
       </div>
 
-      {/* Modal */}
+      {/* Success Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
           <div className="bg-white rounded-xl p-8 max-w-sm text-center shadow-2xl">
@@ -145,7 +114,6 @@ export const ResetPassword = () => {
         </div>
       )}
 
-      {/* Input Style */}
       <style>
         {`
           .input-glass {
