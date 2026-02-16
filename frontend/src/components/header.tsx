@@ -2,17 +2,23 @@
 /* ================= HEADER ================= */
 
 import { Link } from "react-router";
-
 import { useState } from "react";
+import logo from "../assets/logo.png";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
 
   return (
     <header className="fixed w-full z-50 bg-slate-950/80 backdrop-blur border-b border-slate-800">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
-        <h1 className="text-2xl font-bold text-white">User<span className="text-[#46B35C]">Vault</span></h1>
+        <Link to="/">
+          <img
+            src={logo}
+            alt="UserVault Logo"
+            className="w-12 h-24 object-contain"
+          />
+        </Link>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex space-x-8 text-sm font-medium text-slate-200">
@@ -25,10 +31,10 @@ export default function Header() {
         {/* Desktop Buttons */}
         <div className="hidden md:flex space-x-3">
           <button className="px-4 py-2 text-sm rounded-lg border border-slate-700 hover:border-green-500">
-            <Link to='/signin' className=" text-white">Login</Link>
+            <Link to="/signin" className="text-white">Login</Link>
           </button>
           <button className="px-4 py-2 text-sm rounded-lg bg-[#46B35C] hover:bg-green-600">
-            <Link to='/signup' className=" text-white">Get Started</Link>
+            <Link to="/signup" className="text-white">Get Started</Link>
           </button>
         </div>
 
@@ -45,40 +51,24 @@ export default function Header() {
       {open && (
         <div className="md:hidden bg-slate-900 border-t border-slate-800">
           <nav className="flex flex-col px-6 py-4 space-y-4 text-slate-200">
-            <a
-              href="#features"
-              onClick={() => setOpen(false)}
-              className="hover:text-indigo-500"
-            >
+            <a href="#features" onClick={() => setOpen(false)} className="hover:text-indigo-500">
               Features
             </a>
-            <a
-              href="#pricing"
-              onClick={() => setOpen(false)}
-              className="hover:text-indigo-500"
-            >
+            <a href="#pricing" onClick={() => setOpen(false)} className="hover:text-indigo-500">
               Pricing
             </a>
-            <a
-              href="#about"
-              onClick={() => setOpen(false)}
-              className="hover:text-indigo-500"
-            >
+            <a href="#about" onClick={() => setOpen(false)} className="hover:text-indigo-500">
               About
             </a>
-            <a
-              href="#contact"
-              onClick={() => setOpen(false)}
-              className="hover:text-indigo-500"
-            >
+            <a href="#contact" onClick={() => setOpen(false)} className="hover:text-indigo-500">
               Contact
             </a>
 
             <div className="pt-4 flex flex-col space-y-3 border-t border-slate-800">
-              <button className="py-2 rounded-lg border border-slate-700 hover:border-indigo-500">
+              <button className="py-2 rounded-lg border border-slate-700 hover:border-green-500">
                 Login
               </button>
-              <button className="py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600">
+              <button className="py-2 rounded-lg bg-[#46B35C] hover:bg-green-600">
                 Get Started
               </button>
             </div>
@@ -88,6 +78,7 @@ export default function Header() {
     </header>
   );
 }
+
 
 
 

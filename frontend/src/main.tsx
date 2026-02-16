@@ -8,6 +8,8 @@ import { Dashboard } from './pages/dashboard'
 import { Login } from './pages/signin'
 import Home from './pages/Home'
 import { OTPVerification } from './pages/otp'
+import { ForgetPassword } from './pages/foregetPassword'
+import { ResetPassword } from './pages/resetPassword'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -16,6 +18,9 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/" element={<Home />} />
       <Route path="/signup" element={<SignUp />} />
             <Route path="/confirm_email" element={<OTPVerification />} />
+                  <Route path="/forgot_password" element={<ForgetPassword />} />
+                              <Route path="/reset_password" element={<ResetPassword />} />
+
       <Route path="/signin" element={<Login />} />
       <Route path="/dashbaord" element={<Dashboard />} />
       <Route path="/dashboard" element={<DashMenu />} />

@@ -2,18 +2,47 @@ import mongoose, { Schema, Document } from "mongoose";
 import bcrypt from "bcrypt";
 import { NextFunction } from "express";
 
+interface VerificationOtp {
+  otp?: string;
+  isExpired?: boolean;
+  expireTime?: Date;
+}
+
+interface ResetOtp {
+  otp?: string;
+  isExpired?: boolean;
+  expireTime?: Date;
+}
+
 export interface IUser extends Document {
   username: string;
   email: string;
   password: string;
-  otp?: string;
-  access_code?:string;
-  resetOTPExpire?:any;
-  resetOTP?:string;
-  isVerified?:boolean;
+  verification_otp: VerificationOtp;
+  access_code?: string;
+  resetOTP?: ResetOtp;
+  isVerified?: boolean;
   files: mongoose.Types.ObjectId[];
   comparePassword(password: string): Promise<boolean>;
 }
+
+const VerificationOtpSchema: Schema = new Schema(
+  {
+    otp: { type: String },
+    isExpired: { type: Boolean, default: false },
+    expireTime: { type: Date }
+  },
+  { _id: false }
+);
+
+const ResetOtpSchema: Schema = new Schema(
+  {
+    otp: { type: String },
+    isExpired: { type: Boolean, default: false },
+    expireTime: { type: Date }
+  },
+  { _id: false }
+);
 
 const UserSchema: Schema = new Schema(
   {
@@ -34,19 +63,23 @@ const UserSchema: Schema = new Schema(
       type: String,
       required: true
     },
-    resetOTPExpire:{
-      type:String
+
+    verification_otp: {
+      type: VerificationOtpSchema,
+      default: {}
     },
-    resetOTP:{
-      type:String
-},
-    otp: {
+
+    resetOTP: {
+      type: ResetOtpSchema,
+      default: {}
+    },
+
+    access_code: {
       type: String
     },
-    access_code:{
-        type:String
-    },
-    isVerified:{type:Boolean, default:false},
+
+    isVerified: { type: Boolean, default: false },
+
     files: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -57,10 +90,8 @@ const UserSchema: Schema = new Schema(
   { timestamps: true }
 );
 
-//
 // Hash password before saving
-//
-// UserSchema.pre<IUser>("save", async function (next:NextFunction) {
+// UserSchema.pre<IUser>("save", async function (next: NextFunction) {
 //   if (!this.isModified("password")) return next();
 
 //   const salt = await bcrypt.genSalt(10);
@@ -69,9 +100,7 @@ const UserSchema: Schema = new Schema(
 //   next();
 // });
 
-// //
 // // Compare password
-// //
 // UserSchema.methods.comparePassword = async function (
 //   password: string
 // ): Promise<boolean> {

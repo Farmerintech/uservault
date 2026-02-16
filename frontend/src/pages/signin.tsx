@@ -220,7 +220,7 @@ export const Login = () => {
           <div className="flex justify-between text-sm mt-5 text-white/70">
 
             <Link
-              to="/forgot-password"
+              to="/forgot_password"
               className="hover:underline"
             >
               Forgot Password?
