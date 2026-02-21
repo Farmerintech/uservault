@@ -109,7 +109,7 @@ export const loginUser = async (
 
     res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Server error", error,
     });
   }
 };

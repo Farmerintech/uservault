@@ -34,67 +34,86 @@ export const Login = () => {
     setIsLoading(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    setIsLoading(true);
-    setMsg("");
+  setIsLoading(true);
+  setMsg("");
 
-    if (!form.email) return error("Email is required");
-    if (!form.password) return error("Password is required");
-
-    if (form.password.length < 8)
-      return error("Password must be at least 8 characters");
-
-    try {
-      const res = await fetch(`${BaseURL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      console.log(data)
-      //   if(data.message == "User is already verified"){
-      //   setMsg(``);
-      // }
-
-      setMsg(data.message)
-      
-      if (!res.ok) throw new Error();
-
-      
-      dispatch({ type: "Login", payload: data.user });
-
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      navigate("/dashboard");
-    } catch {
-      error("Invalid credentials or network error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  /* ================= UI ================= */
-  const handleVerifyNow = async () =>{
-        try {
-      const res = await fetch(`${BaseURL}/auth/resend_otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({email:form.email}),
-      });
-      const data = await res.json();
-      console.log(data)
-      setMsg(data.message);
-      navigate(`/confirm-otp?email=${form.email}`);
-      if (!res.ok) throw new Error();
-    }catch {
-      error("Invalid credentials or network error");
-    } finally {
-      setIsLoading(false);
-    }
+  // -------------------
+  // Validation
+  // -------------------
+  if (!form.email) {
+    setIsLoading(false);
+    return setMsg("Email is required");
   }
-  return (
+  if (!form.password) {
+    setIsLoading(false);
+    return setMsg("Password is required");
+  }
+  if (form.password.length < 8) {
+    setIsLoading(false);
+    return setMsg("Password must be at least 8 characters");
+  }
+
+  // -------------------
+  // API call
+  // -------------------
+  try {
+    const res = await fetch(`${BaseURL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    const data = await res.json();
+
+    console.log("Login response:", data);
+
+    if (!res.ok) {
+      // Show backend message if available
+      return setMsg(data.message || "Login failed");
+    }
+
+    // -------------------
+    // Save user & redirect
+    // -------------------
+    dispatch({ type: "Login", payload: data.user });
+    localStorage.setItem("user", JSON.stringify(data.user));
+    navigate("/dashboard");
+
+  } catch (err) {
+    console.error("Login error:", err);
+    setMsg("Network error. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+  /* ================= UI ================= */
+const handleVerifyNow = async () => {
+  try {
+    setIsLoading(true);
+
+    const res = await fetch(`${BaseURL}/auth/resend_otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: form.email }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setMsg(data.message);
+      return;
+    }
+
+    navigate(`/confirm-otp?email=${form.email}`);
+  } catch {
+    error("Network error");
+  } finally {
+    setIsLoading(false);
+  }
+};  return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
 
       {/* Background */}
@@ -150,7 +169,7 @@ export const Login = () => {
               {msg}
             </p>
             <button
-            onClick={()=>handleVerifyNow}
+            onClick={handleVerifyNow}
               className="px-6 py-2 bg-[#46B35C] text-white rounded-lg hover:bg-green-600 font-semibold"
             >Verify now
                   {/* <Link to={`/confirm_email?email=${form.email}`}>Verify now</Link> */}

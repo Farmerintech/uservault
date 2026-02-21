@@ -2,31 +2,23 @@ import { useState } from "react";
 import axios from "axios";
 
 export default function FileManager() {
-  const [fileType, setFileType] = useState("");
+  const [fileType, setFileType] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
-  /* ==========================
-     HANDLE FILE SELECT
-  ========================== */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
     setFile(selectedFile);
 
-    // If image → generate preview
     if (fileType === "image") {
-      const imageUrl = URL.createObjectURL(selectedFile);
-      setPreview(imageUrl);
+      setPreview(URL.createObjectURL(selectedFile));
     } else {
       setPreview(null);
     }
   };
 
-  /* ==========================
-     CREATE FILE (UPLOAD)
-  ========================== */
   const handleUpload = async () => {
     if (!file) return;
 
@@ -34,20 +26,25 @@ export default function FileManager() {
     formData.append("file", file);
     formData.append("fileType", fileType);
 
-    await axios.post("/api/files", formData, {
-      headers: { "Content-Type": "multipart/form-data" }
-    });
-
-    alert("Uploaded successfully");
+    try {
+      await axios.post("/api/files", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      alert("Uploaded successfully");
+    } catch (err) {
+      console.error(err);
+      alert("Upload failed");
+    }
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Create File</h2>
+    <div className="p-5">
+      <h2 className="text-xl font-bold mb-3">Create File</h2>
 
       <select
         value={fileType}
         onChange={(e) => setFileType(e.target.value)}
+        className="mb-3 border p-2 rounded"
       >
         <option value="">Select File Type</option>
         <option value="image">Image</option>
@@ -55,31 +52,24 @@ export default function FileManager() {
         <option value="docx">DOCX</option>
       </select>
 
-      <input type="file" onChange={handleFileChange} />
+      <input type="file" onChange={handleFileChange} className="mb-3" />
 
-      <button onClick={handleUpload}>Upload</button>
+      <button
+        onClick={handleUpload}
+        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+      >
+        Upload
+      </button>
 
-      <hr />
-
-      {/* ==========================
-          IMAGE PREVIEW
-      ========================== */}
       {fileType === "image" && preview && (
-        <div>
-          <h3>Image Preview:</h3>
-          <img
-            src={preview}
-            alt="preview"
-            style={{ width: "250px", borderRadius: 8 }}
-          />
+        <div className="mt-5">
+          <h3 className="font-semibold">Image Preview:</h3>
+          <img src={preview} alt="preview" className="w-60 rounded" />
         </div>
       )}
 
-      {/* ==========================
-          PDF/DOCX UI
-      ========================== */}
       {fileType !== "image" && file && (
-        <div>
+        <div className="mt-5">
           <p>Selected File: {file.name}</p>
         </div>
       )}
