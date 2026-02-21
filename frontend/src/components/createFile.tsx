@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { BaseURL } from "./api";
 
 export default function FileManager() {
   const [fileType, setFileType] = useState<string>("");
@@ -27,7 +28,7 @@ export default function FileManager() {
     formData.append("fileType", fileType);
 
     try {
-      await axios.post("/api/files", formData, {
+      await axios.post(`${BaseURL}/file/create_file`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       alert("Uploaded successfully");
