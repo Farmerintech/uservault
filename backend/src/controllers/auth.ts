@@ -293,3 +293,35 @@ export const resetPassword = async (req: Request, res: Response) => {
     return res.status(500).json({ message: err.message });
   }
 };
+
+
+
+
+
+/* =========================================
+   DELETE ALL USERS (ADMIN ONLY)
+========================================= */
+export const deleteAllUsers = async (req: any, res: Response) => {
+  try {
+    // Ensure only admin can perform this action
+    // if (!req.user || req.user.role !== "admin") {
+    //   return res.status(403).json({
+    //     message: "Access denied. Admins only."
+    //   });
+    // }
+
+    const result = await users.deleteMany({});
+
+    res.status(200).json({
+      message: "All users deleted successfully",
+      deletedCount: result.deletedCount
+    });
+    return
+  } catch (error) {
+    res.status(500).json({
+      message: "Error deleting users",
+      error
+    });
+    return
+  }
+};

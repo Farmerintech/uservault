@@ -4,7 +4,7 @@ export interface IFile extends Document {
   user: mongoose.Types.ObjectId;
   fileType: string;
   filePath: string;
-  hashCode: string;
+  hashCode?: string;
   createdAt: Date;
 }
 
@@ -28,7 +28,6 @@ const FileSchema: Schema = new Schema(
 
     hashCode: {
       type: String,
-      required: true,
       unique: true
     }
   },
@@ -37,4 +36,4 @@ const FileSchema: Schema = new Schema(
   }
 );
 
-export default mongoose.model<IFile>("File", FileSchema);
+export default mongoose.model<IFile>("FileModel", FileSchema);

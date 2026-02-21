@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createUser, forgotPassword, loginUser, resendOtp, resetPassword, verifyOtp } from "../controllers/auth";
+import { createUser, deleteAllUsers, forgotPassword, loginUser, resendOtp, resetPassword, verifyOtp } from "../controllers/auth";
 
 const AuthRoute = Router();
 
@@ -9,4 +9,5 @@ AuthRoute.post("/verify-email", verifyOtp)
 AuthRoute.post("/resend_otp", resendOtp)
 AuthRoute.post("/forgot_password", forgotPassword)
 AuthRoute.post("/reset_password", resetPassword)
+AuthRoute.delete("/delete_users", deleteAllUsers)
 export default AuthRoute
