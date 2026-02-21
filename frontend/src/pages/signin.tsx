@@ -78,7 +78,6 @@ const handleSubmit = async (e: React.FormEvent) => {
     // -------------------
     // Save user & redirect
     // -------------------
-    alert(data.user.email)
     dispatch({ type: "Login", payload: {
       email:data.user.email,
       token:data.user.token,
