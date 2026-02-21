@@ -14,13 +14,16 @@ export const getUserByEmail = async (req: Request, res: Response) => {
     const user = await users.findOne({ email }).select("-password -verification_otp -resetOTP");
 
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+       res.status(404).json({ success: false, message: "User not found" });
+       return
     }
 
     res.status(200).json({ success: true, user });
+    return
   } catch (err) {
     console.error("Get User Error:", err);
     res.status(500).json({ success: false, message: "Server error" });
+    return
   }
 };
 
@@ -36,7 +39,10 @@ export const updateUser = async (req: Request, res: Response) => {
 
     const user = await users.findOne({ email });
 
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (!user) {
+        res.status(404).json({ success: false, message: "User not found" });
+    return
+    }
 
     if (username) user.username = username;
     if (password) {
@@ -47,9 +53,11 @@ export const updateUser = async (req: Request, res: Response) => {
     await user.save();
 
     res.status(200).json({ success: true, message: "User updated successfully" });
+    return
   } catch (err) {
     console.error("Update User Error:", err);
     res.status(500).json({ success: false, message: "Server error" });
+    return
   }
 };
 
@@ -64,12 +72,17 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     const user = await users.findOneAndDelete({ email });
 
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (!user)  {
+        res.status(404).json({ success: false, message: "User not found" });
+        return
+}
 
     res.status(200).json({ success: true, message: "User deleted successfully" });
+    return
   } catch (err) {
     console.error("Delete User Error:", err);
     res.status(500).json({ success: false, message: "Server error" });
+    return
   }
 };
 
@@ -84,7 +97,9 @@ export const resetAccessCode = async (req: Request, res: Response) => {
     const {newAccessCode} =req.body
     const user = await users.findOne({ email });
 
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (!user)  {res.status(404).json({ success: false, message: "User not found" });
+    return
+}
 
     // Generate new random access code (6-digit)
     // const newAccessCode = crypto.randomInt(100000, 999999).toString();
@@ -92,9 +107,12 @@ export const resetAccessCode = async (req: Request, res: Response) => {
     user.access_code = newAccessCode;
     await user.save();
 
-    res.status(200).json({ success: true, message: "Access code reset successfully", access_code: newAccessCode });
+    res.status(200).json({ success: true, message: "Access code reset successfully", 
+        access_code: newAccessCode });
+        return
   } catch (err) {
     console.error("Reset Access Code Error:", err);
     res.status(500).json({ success: false, message: "Server error" });
+    return
   }
 };
