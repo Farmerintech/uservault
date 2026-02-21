@@ -4,16 +4,16 @@ import axios from "axios";
 import {jwtDecode} from "jwt-decode";
 import { UserContext } from "../context/provider";
 import { DashMenu } from "../components/dash-menu";
-import { Main } from "../components/main";
+import FileManager from "../components/createFile";
 import { BaseURL } from "../components/api";
 
-export const MainPage = () => {
+export const AddFile = () => {
   const { state } = useContext(UserContext);
   const navigate = useNavigate();
 
   const token = state?.user?.token;
 
-  const [ setData] = useState<any>(null);
+  const [setData] = useState<any>(null);
   const [msg, setMsg] = useState<string | null>(null);
 
   const headers = {
@@ -74,12 +74,16 @@ export const MainPage = () => {
 
       <section className={`${themeClasses} hidden md:flex justify-between min-h-screen`}>
         <DashMenu />
-        <Main />
+            <main className="flex flex-col gap-5 lg:w-[50%] md:w-[40%] p-5 md:pt-5 relative lg:left-[22%] md:left-[32%]">
+
+        <FileManager/>
+        </main>
       </section>
 
       <section className={`${themeClasses} md:hidden justify-between min-h-screen`}>
-    <DashMenu />
-        <Main />
+                <DashMenu />
+
+        <FileManager/>
       </section>
     </>
   );

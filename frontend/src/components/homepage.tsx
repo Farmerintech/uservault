@@ -18,7 +18,7 @@ export const DashboardHome = () => {
 
   useEffect(() => {
     axios
-      .get(`${BaseURL}/user/get_user/${state.user.username}`, { headers })
+      .get(`${BaseURL}/user/get_user/${state.user.email}`, { headers })
       .then((res) => setUser(res.data.user))
       .catch((err) => setMsg(err.response?.data?.message || "Error fetching user"));
   }, [state.user.username]);

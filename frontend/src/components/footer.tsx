@@ -7,11 +7,11 @@ export const Footer = ()=>{
     return(
         <section className={`${state.theme === "light" ? "bg-white text-black" :"bg-gray-800 text-white"} p-5 w-[100%] md:hidden flex items-center 
         justify-between fixed bottom-0  shadow-md`}>
-            <Link to="/" className="flex flex-col items-center hover:text-purple-800">
+            <Link to="/user/dashboard" className="flex flex-col items-center hover:text-purple-800">
                 <MdHome size={25}/>
                 <p>Home</p>
             </Link>
-            <Link to="/dashboard" className="flex flex-col items-center hover:text-purple-800">
+            <Link to="/user/add_file" className="flex flex-col items-center hover:text-purple-800">
                 <MdDashboard size={25}/>
                 <p>Dashboad</p>
             </Link>

@@ -78,7 +78,13 @@ const handleSubmit = async (e: React.FormEvent) => {
     // -------------------
     // Save user & redirect
     // -------------------
-    dispatch({ type: "Login", payload: data.user });
+    alert(data.user.email)
+    dispatch({ type: "Login", payload: {
+      email:data.user.email,
+      token:data.user.token,
+      username:data.user.username,
+      id:data.user._id
+    } });
     localStorage.setItem("user", JSON.stringify(data.user));
     navigate("/user/dashboard");
 

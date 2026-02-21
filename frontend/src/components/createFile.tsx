@@ -38,7 +38,7 @@ export default function FileManager() {
   };
 
   return (
-    <div className="p-5">
+    <div className="p-5 flex flex-col">
       <h2 className="text-xl font-bold mb-3">Create File</h2>
 
       <select

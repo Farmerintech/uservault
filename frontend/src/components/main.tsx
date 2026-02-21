@@ -1,4 +1,3 @@
-import FileManager from "./createFile";
 import { DashboardHome } from "./homepage";
 
 export const Main = () => {
