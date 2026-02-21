@@ -112,7 +112,7 @@ const handleVerifyNow = async () => {
       return;
     }
 
-    navigate(`/confirm-otp?email=${form.email}`);
+    navigate(`/confirm_email?email=${form.email}`);
   } catch {
     error("Network error");
   } finally {
