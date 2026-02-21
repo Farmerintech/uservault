@@ -52,9 +52,32 @@ export const OTPVerification = () => {
   
   const handleContinue = () => {
     setShowModal(false);
-    navigate("/dashboard"); // Navigate to dashboard
+    navigate("/signin"); // Navigate to dashboard
   };
+const handleVerifyNow = async () => {
+  try {
+    setIsLoading(true);
 
+    const res = await fetch(`${BaseURL}/auth/resend_otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: emailFromQuery}),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      setMsg(data.message);
+      return;
+    }
+
+    navigate(`/confirm-otp?email=${emailFromQuery}`);
+  } catch {
+    // error("Network error");
+  } finally {
+    setIsLoading(false);
+  }
+}
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
       {/* Background */}
@@ -121,7 +144,7 @@ export const OTPVerification = () => {
             <button
               type="button"
               className="text-[#46B35C] font-semibold hover:underline"
-              onClick={() => alert("Resend OTP clicked")}
+              onClick={handleVerifyNow}
             >
               Resend OTP
             </button>
@@ -137,7 +160,7 @@ export const OTPVerification = () => {
               Email Verified Successfully!
             </h3>
             <p className="text-gray-700 mb-6">
-              You can now continue to your dashboard.
+              You can now continue to your signin.
             </p>
             <button
               onClick={handleContinue}

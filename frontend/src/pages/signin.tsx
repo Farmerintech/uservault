@@ -80,7 +80,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     // -------------------
     dispatch({ type: "Login", payload: data.user });
     localStorage.setItem("user", JSON.stringify(data.user));
-    navigate("/dashboard");
+    navigate("/user/dashboard");
 
   } catch (err) {
     console.error("Login error:", err);

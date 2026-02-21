@@ -20,7 +20,7 @@ createRoot(document.getElementById('root')!).render(
        <Route path="/forgot_password" element={<ForgetPassword />} />
       <Route path="/reset_password" element={<ResetPassword />} />
       <Route path="/signin" element={<Login />} />
-      <Route path="/page" element={<MainPage />} />
+      <Route path="/user/dashboard" element={<MainPage />} />
       {/* <Route path="/dashboard" element={<DashMenu />} /> */}
     </Routes>
   </BrowserRouter>  

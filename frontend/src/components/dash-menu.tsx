@@ -36,15 +36,15 @@ export const DashMenu = ({ aditiionalStyle }: any) => {
                     {/* <ProfileCard/> */}
                 </div>
                 <ul className="">
-                    <Link to="/"><li className={` ${state.theme === "light" ? "bg-black text-white " : "bg-white text-black"} flex items-center gap-3 mb-3 py-4 px-2 rounded-l-lg`}>
+                    <Link to="/user/dashboard"><li className={` ${state.theme === "light" ? "bg-black text-white " : "bg-white text-black"} flex items-center gap-3 mb-3 py-4 px-2 rounded-l-lg`}>
                         <BiHome />Home</li></Link>
-                    <Link to="/add_post">
+                    <Link to="/user/add_post">
                         <li className="flex items-center gap-3 mb-3"><MdOutlinePostAdd />Add New File</li>
                     </Link>
-                    <Link to="/my_file">
+                    <Link to="/user/my_file">
                         <li className="flex items-center gap-3 mb-3"> <BiFile />My Files</li>
                     </Link>
-                    <Link to="/my_profile">
+                    <Link to="/user/my_profile">
                         <li className="flex items-center gap-3 mb-3"> <MdOutlineShoppingBag />My Profile
                             <span className=" bg-purple-500 w-[5px] h-[5px] rounded-full "></span>
                         </li>
