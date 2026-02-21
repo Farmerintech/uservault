@@ -111,7 +111,6 @@ const handleVerifyNow = async () => {
       setMsg(data.message);
       return;
     }
-
     navigate(`/confirm_email?email=${form.email}`);
   } catch {
     error("Network error");
