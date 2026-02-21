@@ -24,24 +24,24 @@ export const MainPage = () => {
   // ----------------------
   // Check JWT token
   // ----------------------
-//   useEffect(() => {
-//     if (!token) {
-//       navigate("/signin");
-//       return;
-//     }
+  useEffect(() => {
+    if (!token) {
+      navigate("/signin");
+      return;
+    }
 
-//     try {
-//       const decoded: any = jwtDecode(token);
-//       const currentTime = Date.now() / 1000;
+    try {
+      const decoded: any = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
 
-//       if (decoded?.exp && decoded.exp < currentTime) {
-//         navigate("/signin");
-//       }
-//     } catch (error) {
-//       console.error("Token decode error:", error);
-//       navigate("/signin");
-//     }
-//   }, [token, navigate]);
+      if (decoded?.exp && decoded.exp < currentTime) {
+        navigate("/signin");
+      }
+    } catch (error) {
+      console.error("Token decode error:", error);
+      navigate("/signin");
+    }
+  }, [token, navigate]);
 
   // ----------------------
   // Fetch user profile
