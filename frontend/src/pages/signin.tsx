@@ -173,7 +173,7 @@ const handleVerifyNow = async () => {
               {msg}
             </p>
             <button
-            onClick={handleVerifyNow}
+            onClick={()=>handleVerifyNow()}
               className="px-6 py-2 bg-[#46B35C] text-white rounded-lg hover:bg-green-600 font-semibold"
             >Verify now
                   {/* <Link to={`/confirm_email?email=${form.email}`}>Verify now</Link> */}

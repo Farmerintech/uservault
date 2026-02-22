@@ -163,7 +163,7 @@ const handleVerifyNow = async () => {
               You can now continue to your signin.
             </p>
             <button
-              onClick={handleContinue}
+              onClick={()=>handleContinue()}
               className="px-6 py-2 bg-[#46B35C] text-white rounded-lg hover:bg-green-600 font-semibold"
             >
               Continue
