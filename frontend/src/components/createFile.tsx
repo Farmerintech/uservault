@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import axios from "axios";
 import { BaseURL } from "./api";
+import { UserContext } from "../context/provider";
 
 export default function FileManager() {
   const [fileType, setFileType] = useState<string>("");
@@ -41,13 +42,22 @@ export default function FileManager() {
       );
 
       const { secure_url} = cloudRes.data;
-      alert(`${secure_url},${fileType} `)
+      // alert(`${secure_url},${fileType} `)
       // 2️⃣ Send only metadata to backend
-      await axios.post(`${BaseURL}/file/create_file`, {
-        fileType,
-      filePath:secure_url,
-      });
-
+const {state} = useContext(UserContext)
+const token = state?.user?.token
+await axios.post(
+  `${BaseURL}/file/create_file`,
+  {
+    fileType,
+    filePath: secure_url,
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
       alert("Uploaded successfully");
       setFile(null);
       setPreview(null);
