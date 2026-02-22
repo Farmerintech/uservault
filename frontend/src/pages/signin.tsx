@@ -97,7 +97,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   /* ================= UI ================= */
 const handleVerifyNow = async () => {
   try {
-    setIsLoading(true);
+    setIsLoading(false);
 
     const res = await fetch(`${BaseURL}/auth/resend_otp`, {
       method: "POST",
@@ -172,14 +172,14 @@ const handleVerifyNow = async () => {
             <p className="text-gray-700 mb-6">
               {msg}
             </p>
-            <p
+            <button
             onClick={handleVerifyNow}
               className="px-6 py-2 bg-[#46B35C] text-white rounded-lg hover:bg-green-600 font-semibold"
             >Verify now
                   {/* <Link to={`/confirm_email?email=${form.email}`}>Verify now</Link> */}
 
               
-            </p>
+            </button>
           </div>
         </div>
           
