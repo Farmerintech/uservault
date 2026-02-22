@@ -56,7 +56,7 @@ export const OTPVerification = () => {
   };
 const handleVerifyNow = async () => {
   try {
-    setIsLoading(true);
+    // setIsLoading(true);
 
     const res = await fetch(`${BaseURL}/auth/resend_otp`, {
       method: "POST",
