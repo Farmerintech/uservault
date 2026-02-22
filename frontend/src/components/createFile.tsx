@@ -40,15 +40,12 @@ export default function FileManager() {
         formData
       );
 
-      const { secure_url, public_id, resource_type } = cloudRes.data;
-
+      const { secure_url} = cloudRes.data;
+      alert(`${secure_url},${fileType} `)
       // 2️⃣ Send only metadata to backend
       await axios.post(`${BaseURL}/file/create_file`, {
         fileType,
-        url: secure_url,
-        publicId: public_id,
-        resourceType: resource_type,
-        originalName: file.name,
+      filePath:secure_url,
       });
 
       alert("Uploaded successfully");
@@ -65,8 +62,7 @@ export default function FileManager() {
 
   return (
     <div className="p-5 flex flex-col max-w-md">
-      <h2 className="text-xl font-bold mb-3">Create File</h2>
-
+      <h2 className="text-xl font-bold mb-3">Upload File to Secure Cloud Storage</h2>
       <select
         value={fileType}
         onChange={(e) => setFileType(e.target.value)}
@@ -93,13 +89,7 @@ export default function FileManager() {
         }
       />
 
-      <button
-        onClick={handleUpload}
-        disabled={loading}
-        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
-      >
-        {loading ? "Uploading..." : "Upload"}
-      </button>
+   
 
       {fileType === "image" && preview && (
         <div className="mt-5">
@@ -113,6 +103,13 @@ export default function FileManager() {
           <p>Selected File: {file.name}</p>
         </div>
       )}
+         <button
+        onClick={handleUpload}
+        disabled={loading}
+        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+      >
+        {loading ? "Uploading..." : "Upload"}
+      </button>
     </div>
   );
 }
