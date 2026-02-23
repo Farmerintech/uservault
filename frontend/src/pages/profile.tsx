@@ -5,9 +5,9 @@ import { jwtDecode } from "jwt-decode";
 import { UserContext } from "../context/provider";
 import { DashMenu } from "../components/dash-menu";
 import { BaseURL } from "../components/api";
-import AllFiles from "../components/myFiles";
+import ProfilePage from "../components/myProfile";
 
-export const Files = () => {
+export const Profile = () => {
     const { state } = useContext(UserContext);
     const navigate = useNavigate();
 
@@ -76,14 +76,14 @@ export const Files = () => {
                 <DashMenu />
                 <main className="flex flex-col gap-5 lg:w-[50%] md:w-[40%] p-5 md:pt-5 relative lg:left-[22%] md:left-[32%]">
 
-                    <AllFiles/>
+                    <ProfilePage/>
                 </main>
             </section>
 
             <section className={`${themeClasses} md:hidden justify-between min-h-screen`}>
                 <DashMenu />
 
-                <AllFiles />
+                <ProfilePage />
             </section>
         </>
     );

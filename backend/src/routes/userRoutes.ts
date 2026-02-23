@@ -5,6 +5,6 @@ const userRoute = Router();
 
 userRoute.get("/get_user/:email", getUserByEmail)
 .put("/edit_user/:email", updateUser)
-.delete("/get_files/:email", deleteUser)
-.put("/delete_file/:email", resetAccessCode)
+.delete("/get_user/:email", deleteUser)
+.put("/delete_user/:email", resetAccessCode)
 export default userRoute
