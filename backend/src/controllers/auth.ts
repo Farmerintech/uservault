@@ -4,7 +4,7 @@ import users from "../models/users";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { SignOptions} from "jsonwebtoken";
-import { SendMail } from "../utils/nodemail";
+import { SendMail } from "../utils/resend";
 import { generateOTP } from "../utils/generateOtp";
 import { getOtpEmailHTML, Resethtml } from "../utils/html";
 import { Document } from "mongoose";
