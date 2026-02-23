@@ -13,7 +13,8 @@ const app = express();
 // Allow requests from specific origins
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://securevault.citadel-i.com.ng'
+  'https://securevault.citadel-i.com.ng',
+  'https://uservault-two.vercel.app/'
 ];
 
 app.use(cors({
