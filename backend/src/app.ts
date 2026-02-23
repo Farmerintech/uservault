@@ -14,7 +14,7 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173',
   'https://securevault.citadel-i.com.ng',
-  'https://uservault-two.vercel.app/'
+  'https://uservault-two.vercel.ap/'
 ];
 
 app.use(cors({
