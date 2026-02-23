@@ -3,7 +3,8 @@ import { UserContext } from "../context/provider";
 import { BaseURL } from "./api";
 
 interface User {
-  name: string;
+user:any;
+  username: string;
   email: string;
 }
 
@@ -27,7 +28,7 @@ export default function ProfilePage() {
       setError(null);
 
       try {
-        const res = await fetch(`${BaseURL}/get_user/${email}`, {
+        const res = await fetch(`${BaseURL}/user/get_user/${email}`, {
           headers: {
             "Content-Type": "application/json",
             // Authorization: `Bearer ${token}`,
@@ -39,8 +40,8 @@ export default function ProfilePage() {
         }
 
         const data: User = await res.json();
-        setUser(data);
-        setNameInput(data.name); // prefill update field
+        setUser(data.user);
+        setNameInput(data.user.username); // prefill update field
       } catch (err: any) {
         console.error(err);
         setError(err.message);
@@ -90,7 +91,7 @@ export default function ProfilePage() {
       {/* Display profile info */}
       <div className="mb-5">
         <p>
-          <strong>Name:</strong> {user?.name}
+          <strong>Name:</strong> {user?.username}
         </p>
         <p>
           <strong>Email:</strong> {user?.email}

@@ -29,10 +29,10 @@ export const Login = () => {
 
   const togglePassword = () => setShow((p) => !p);
 
-  const error = (text: string) => {
-   msg ==='' && setMsg(text);
-    setIsLoading(false);
-  };
+  // const error = (text: string) => {
+  //  msg ==='' && setMsg(text);
+  //   setIsLoading(false);
+  // };
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -95,9 +95,16 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 };
   /* ================= UI ================= */
+
+  const [isVerifying, setIsVerifying] = useState(false); // new state for OTP
 const handleVerifyNow = async () => {
+  if (!form.email) {
+    return setMsg("Please enter your email to receive OTP");
+  }
+
   try {
-    setIsLoading(false);
+    setIsVerifying(true);
+    setMsg("");
 
     const res = await fetch(`${BaseURL}/auth/resend_otp`, {
       method: "POST",
@@ -108,16 +115,21 @@ const handleVerifyNow = async () => {
     const data = await res.json();
 
     if (!res.ok) {
-      setMsg(data.message);
+      setMsg(data.message || "Failed to send OTP");
       return;
     }
+
+    // Show alert before navigating
+    alert("OTP sent successfully!");
     navigate(`/confirm_email?email=${form.email}`);
-  } catch {
-    error("Network error");
+  } catch (err) {
+    console.error(err);
+    setMsg("Network error. Please try again.");
   } finally {
-    setIsLoading(false);
+    setIsVerifying(false);
   }
-};  return (
+};
+  return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
 
       {/* Background */}
@@ -173,13 +185,12 @@ const handleVerifyNow = async () => {
               {msg}
             </p>
             <button
-            onClick={()=>handleVerifyNow()}
-              className="px-6 py-2 bg-[#46B35C] text-white rounded-lg hover:bg-green-600 font-semibold"
-            >Verify now
-                  {/* <Link to={`/confirm_email?email=${form.email}`}>Verify now</Link> */}
-
-              
-            </button>
+  onClick={handleVerifyNow}
+  disabled={isVerifying}
+  className="px-6 py-2 bg-[#46B35C] text-white rounded-lg hover:bg-green-600 font-semibold disabled:opacity-60"
+>
+  {isVerifying ? "Sending OTP..." : "Verify now"}
+</button>
           </div>
         </div>
           

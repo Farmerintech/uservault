@@ -75,9 +75,13 @@ export default function AllFiles() {
                 style={{ width: "200px", borderRadius: "6px" }}
               />
             ) : (
-              <a href={file.filePath} target="_blank" rel="noopener noreferrer">
-                Open Document
-              </a>
+              <a 
+  href={file.filePath} 
+  download 
+  className="text-blue-600 hover:underline"
+>
+  Download Document
+</a>
             )}
           </div>
         ))}

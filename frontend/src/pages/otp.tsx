@@ -54,31 +54,39 @@ export const OTPVerification = () => {
     setShowModal(false);
     navigate("/signin"); // Navigate to dashboard
   };
+  const [isVerifying, setIsVerifying] = useState(false); // new state for OTP
 const handleVerifyNow = async () => {
+  if (!emailFromQuery) {
+    return setMsg("Please enter your email to receive OTP");
+  }
+
   try {
-    // setIsLoading(true);
+    setIsVerifying(true);
+    setMsg("");
 
     const res = await fetch(`${BaseURL}/auth/resend_otp`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: emailFromQuery}),
+      body: JSON.stringify({ email: emailFromQuery }),
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      setMsg(data.message);
+      setMsg(data.message || "Failed to send OTP");
       return;
     }
 
-    navigate(`/confirm-otp?email=${emailFromQuery}`);
-  } catch {
-    // error("Network error");
+    // Show alert before navigating
+    alert("OTP sent successfully!");
+    navigate(`/confirm_email?email=${emailFromQuery}`);
+  } catch (err) {
+    console.error(err);
+    setMsg("Network error. Please try again.");
   } finally {
-    setIsLoading(false);
+    setIsVerifying(false);
   }
-}
-  return (
+};  return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
       {/* Background */}
       <div
@@ -141,13 +149,13 @@ const handleVerifyNow = async () => {
 
           <div className="text-center text-sm text-white/70">
             Didn't receive the code?{" "}
-            <button
-              type="button"
-              className="text-[#46B35C] font-semibold hover:underline"
-              onClick={handleVerifyNow}
-            >
-              Resend OTP
-            </button>
+           <button
+  onClick={handleVerifyNow}
+  disabled={isVerifying}
+  className="px-6 py-2 bg-[#46B35C] text-white rounded-lg hover:bg-green-600 font-semibold disabled:opacity-60"
+>
+  {isVerifying ? "Sending OTP..." : "Resend OTP"}
+</button>
           </div>
         </form>
       </div>
