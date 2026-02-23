@@ -11,6 +11,7 @@ import { ResetPassword } from './pages/resetPassword'
 import {MainPage} from './pages/mainPage'
 import { AddFile } from './pages/addFile'
 import { UserProvider } from './context/provider'
+import { Files } from './pages/files'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')!).render(
       <Route path="/signin" element={<Login />} />
       <Route path="/user/dashboard" element={<MainPage />} />
             <Route path="/user/ad_file" element={<AddFile />} />
+                        <Route path="/user/my_file" element={<Files />} />
       {/* <Route path="/dashboard" element={<DashMenu />} /> */}
     </Routes>
   </BrowserRouter>  

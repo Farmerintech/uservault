@@ -98,14 +98,14 @@ export const getFile = async (req: any, res: Response) => {
 export const getUserFiles = async (req: any, res: Response) => {
   try {
     const userId = req.user.id;
-    const { access_code } = req.body;
+    // const { access_code } = req.body;
 
     const user = await users.findById(userId);
 
-    if (!user || user.access_code !== access_code) {
-       res.status(403).json({ message: "Invalid secret code" });
-       return
-    }
+    // if (!user || user.access_code !== access_code) {
+    //    res.status(403).json({ message: "Invalid secret code" });
+    //    return
+    // }
 
     const files = await fileModel.find({ user: userId }).sort({ createdAt: -1 });
 

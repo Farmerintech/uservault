@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState, useContext } from "react";
+import { BaseURL } from "./api";
+import { UserContext } from "../context/provider";
 
 interface FileType {
   _id: string;
@@ -11,21 +12,41 @@ interface FileType {
 export default function AllFiles() {
   const [files, setFiles] = useState<FileType[]>([]);
   const [loading, setLoading] = useState(true);
+  const { state } = useContext(UserContext);
+  const token = state?.user?.token;
 
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const res = await axios.get("/api/files");
-        setFiles(res.data.files);
-      } catch (error) {
-        console.error(error);
+        const res = await fetch(`${BaseURL}/file/get_files`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(
+            `Failed to fetch files: ${res.status} ${res.statusText} ${
+              errData.message || ""
+            }`
+          );
+        }
+
+        const data = await res.json();
+        setFiles(data.files || []);
+      } catch (error: any) {
+        console.error("Error fetching files:", error);
+        alert(`Error fetching files: ${error.message}`);
       } finally {
         setLoading(false);
       }
     };
 
     fetchFiles();
-  }, []);
+  }, [token]);
 
   if (loading) return <p>Loading files...</p>;
 
@@ -40,23 +61,21 @@ export default function AllFiles() {
             style={{
               border: "1px solid #ddd",
               padding: "15px",
-              borderRadius: "8px"
+              borderRadius: "8px",
             }}
           >
-            <p><strong>Type:</strong> {file.fileType}</p>
+            <p>
+              <strong>Type:</strong> {file.fileType}
+            </p>
 
             {file.fileType === "image" ? (
               <img
-                src={`/api/files/render/${file._id}`}
+                src={file.filePath}
                 alt="file"
                 style={{ width: "200px", borderRadius: "6px" }}
               />
             ) : (
-              <a
-                href={file.filePath}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={file.filePath} target="_blank" rel="noopener noreferrer">
                 Open Document
               </a>
             )}
