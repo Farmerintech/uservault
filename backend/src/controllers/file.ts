@@ -97,25 +97,25 @@ export const getFile = async (req: any, res: Response) => {
 ========================================= */
 export const getUserFiles = async (req: any, res: Response) => {
   try {
-    const userId = req.user.id;
-    // const { access_code } = req.body;
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
+    const userId = req.user.id;
     const user = await users.findById(userId);
 
-    // if (!user || user.access_code !== access_code) {
-    //    res.status(403).json({ message: "Invalid secret code" });
-    //    return
-    // }
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     const files = await fileModel.find({ user: userId }).sort({ createdAt: -1 });
 
     res.status(200).json({
       count: files.length,
-      files
+      files,
     });
-    return
   } catch (error) {
-    res.status(500).json({ message: "Error retrieving files", error });
-    return
+    console.error("Error fetching user files:", error);
+    res.status(500).json({ message: "Error retrieving files" });
   }
 };
