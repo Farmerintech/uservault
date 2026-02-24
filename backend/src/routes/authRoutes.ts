@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { createUser, deleteAllUsers, forgotPassword, loginUser, resendOtp, resetPassword, verifyOtp } from "../controllers/auth";
+import { compareFaceController, createUser, deleteAllUsers, forgotPassword, loginUser, resendOtp, resetPassword, verifyOtp } from "../controllers/auth";
+import { saveFace } from "../controllers/user";
 
 const AuthRoute = Router();
 
@@ -9,5 +10,7 @@ AuthRoute.post("/verify-email", verifyOtp)
 AuthRoute.post("/resend_otp", resendOtp)
 AuthRoute.post("/forgot_password", forgotPassword)
 AuthRoute.post("/reset_password", resetPassword)
-AuthRoute.delete("/delete_users", deleteAllUsers)
+AuthRoute.delete("/delete_users", deleteAllUsers);
+AuthRoute.put("/save_face", saveFace)
+AuthRoute.post("/compare_face", compareFaceController )
 export default AuthRoute

@@ -116,3 +116,67 @@ export const resetAccessCode = async (req: Request, res: Response) => {
     return
   }
 };
+
+
+// POST /user/save_face
+
+// controllers/userController.ts
+
+// extend Request type to include user from auth middleware
+interface AuthRequest extends Request {
+  user?: {
+    id: string;
+  };
+}
+
+
+export const saveFace = async (req: Request, res: Response) => {
+  try {
+    // ------------------ AUTH CHECK ------------------
+    // optional: if you have auth middleware, you can get req.user
+
+    const { faceImage, email } = req.body;
+
+    // ------------------ FIND USER ------------------
+    const isUser = await users.findOne({ email });
+    if (!isUser) {
+      return res.status(404).json({ message: "User with this email not found" });
+    }
+
+    // ------------------ VALIDATION ------------------
+    if (!faceImage) {
+      return res.status(400).json({ message: "Face image URL is required" });
+    }
+
+    // Optional: ensure it's from Cloudinary
+    if (!faceImage.includes("res.cloudinary.com")) {
+      return res.status(400).json({
+        message: "Invalid image source",
+      });
+    }
+
+    // ------------------ UPDATE USER ------------------
+    const user = await users.findByIdAndUpdate(
+      isUser._id,
+      { faceImage },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.json({
+      success: true,
+      message: "Face registered successfully",
+      user,
+    });
+
+  } catch (err: any) {
+    console.error("Save face error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};

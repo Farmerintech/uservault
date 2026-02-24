@@ -24,6 +24,12 @@ export interface IUser extends Document {
   isVerified?: boolean;
   files: mongoose.Types.ObjectId[];
   comparePassword(password: string): Promise<boolean>;
+credentials: {
+    credentialID: Buffer;
+    publicKey: Buffer;
+    counter: number;
+  }[];
+  faceImage:any
 }
 
 const VerificationOtpSchema: Schema = new Schema(
@@ -63,7 +69,9 @@ const UserSchema: Schema = new Schema(
       type: String,
       required: true
     },
-
+  faceImage: {
+      type: String,
+    },
     verification_otp: {
       type: VerificationOtpSchema,
       default: {}
@@ -79,7 +87,13 @@ const UserSchema: Schema = new Schema(
     },
 
     isVerified: { type: Boolean, default: false },
-
+  credentials: [
+  {
+    credentialID: Buffer,
+    publicKey: Buffer,
+    counter: Number,
+  }
+],
     files: [
       {
         type: mongoose.Schema.Types.ObjectId,
