@@ -105,7 +105,7 @@ export const FaceRegister = () => {
       }
       alert(cloudData.secure_url,)
       const saveRes = await fetch(`${BaseURL}/auth/save_face`, {
-        method: "POST",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           // Authorization: `Bearer ${state.user.token}`,
