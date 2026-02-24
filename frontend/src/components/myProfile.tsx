@@ -31,7 +31,7 @@ export default function ProfilePage() {
         const res = await fetch(`${BaseURL}/user/get_user/${email}`, {
           headers: {
             "Content-Type": "application/json",
-            // Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
