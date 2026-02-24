@@ -9,8 +9,7 @@ import { generateOTP } from "../utils/generateOtp";
 import { getOtpEmailHTML, Resethtml } from "../utils/html";
 import { Document } from "mongoose";
 import { decryptData, encryptData } from "../utils/crypto";
-import { loadImageFromBase64, loadImageFromUrl,  getFaceSimilarity,
- } from "../utils/face";
+import { loadFaceModels, modelsLoaded, loadImageFromBase64, loadImageFromUrl, getFaceSimilarity } from "../utils/face";
 
 export interface AuthUser {
   id: string;
@@ -335,12 +334,21 @@ export const deleteAllUsers = async (req: any, res: Response) => {
 
 
 
+
+
+// ✅ Load models once at server start
+loadFaceModels().catch(err => console.error(err));
+
 export const compareFaceController = async (req: Request, res: Response) => {
   try {
     const { email, image } = req.body;
 
     if (!email || !image) {
       return res.status(400).json({ message: "Email and image required" });
+    }
+
+    if (!modelsLoaded) {
+      return res.status(503).json({ message: "Face models not loaded yet, try again later" });
     }
 
     const user = await users.findOne({ email });
@@ -360,7 +368,7 @@ export const compareFaceController = async (req: Request, res: Response) => {
       verified: similarity > 75, // threshold
     });
   } catch (err: any) {
-    console.error(err);
-    return res.status(500).json({ message: err.message });
+    console.error("Face verification failed:", err);
+    return res.status(500).json({ message: err.message || "Internal server error" });
   }
 };
