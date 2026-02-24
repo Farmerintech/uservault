@@ -14,7 +14,7 @@ faceapi.env.monkeyPatch({
   ImageData: ImageData as any,
 });
 
-const MODEL_URL = path.join(__dirname, "face-api-models");
+const MODEL_URL = path.join(__dirname, "../../face-api-models");
 
 // ✅ Load all face-api models safely
 export let modelsLoaded = false;
