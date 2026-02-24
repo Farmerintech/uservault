@@ -1,6 +1,4 @@
-Here is your **professional, production-ready GitHub README documentation** structured the way recruiters, collaborators, and open-source contributors expect it.
 
-You can paste this directly into your `README.md`.
 
 ---
 
