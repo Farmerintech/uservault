@@ -40,7 +40,7 @@ export const DashMenu = ({ aditiionalStyle }: any) => {
           <MdMenu size={30} />
         </button>
         <h2 className="ml-3 font-bold text-xl">
-          User<span className="text-purple-800 text-2xl">Vault</span>
+          Secure<span className="text-[#46B35C] text-2xl">Vault</span>
         </h2>
       </div>
 
