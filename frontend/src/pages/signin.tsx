@@ -85,7 +85,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       id:data.user._id
     } });
     localStorage.setItem("user", JSON.stringify(data.user));
-    navigate("/user/dashboard");
+  navigate(`/user/verify_face?email=${form.email}`); // Navigate to dashboard
 
   } catch (err) {
     console.error("Login error:", err);

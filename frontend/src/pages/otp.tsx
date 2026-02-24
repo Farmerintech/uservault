@@ -52,7 +52,7 @@ export const OTPVerification = () => {
   
   const handleContinue = () => {
     setShowModal(false);
-    navigate("/signin"); // Navigate to dashboard
+    navigate(`/user/biometric?email=${emailFromQuery}`); // Navigate to dashboard
   };
   const [isVerifying, setIsVerifying] = useState(false); // new state for OTP
 const handleVerifyNow = async () => {

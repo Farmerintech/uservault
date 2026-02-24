@@ -13,6 +13,8 @@ import { AddFile } from './pages/addFile'
 import { UserProvider } from './context/provider'
 import { Files } from './pages/files'
 import { Profile } from './pages/profile'
+import { FaceRegister } from './pages/captureFace'
+import { FaceVerify } from './pages/verifyFace'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -29,6 +31,11 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/user/ad_file" element={<AddFile />} />
                         <Route path="/user/my_file" element={<Files />} />
                          <Route path="/user/my_profile" element={<Profile />} />
+                                                  <Route path="/user/biometric" element={<FaceRegister />} />
+                                                  
+                                                  <Route path="/user/verify_face" element={<FaceVerify />} />
+
+
       {/* <Route path="/dashboard" element={<DashMenu />} /> */}
     </Routes>
   </BrowserRouter>  
