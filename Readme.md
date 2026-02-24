@@ -1,6 +1,4 @@
-Here is your **complete, research-grade README.md** written professionally for an undergraduate project submission.
 
-You can paste this directly into your `README.md`.
 
 ---
 
@@ -278,6 +276,9 @@ src/
 ```bash
 git clone https://github.com/your-username/secure-cloud-user.git
 cd secure-cloud-user
+cd backend (for backend)
+npm install
+cd frontennd(for frontend)
 npm install
 ```
 
