@@ -13,7 +13,7 @@ faceapi.env.monkeyPatch({
   ImageData: canvas.ImageData as any,
 });
 
-const MODEL_URL = path.join(__dirname, "../face-api-models");
+const MODEL_URL = path.join(__dirname, "face-api-models");
 
 export async function loadFaceModels() {
   await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODEL_URL);
@@ -62,3 +62,5 @@ export async function getFaceSimilarity(img1: any, img2: any) {
 
   return Math.max(0, 1 - distance) * 100;
 }
+
+

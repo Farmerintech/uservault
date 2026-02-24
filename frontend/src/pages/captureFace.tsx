@@ -123,7 +123,7 @@ export const FaceRegister = () => {
       }
 
       alert("Face registered successfully 🎉");
-      navigate("signin");
+      navigate("/signin");
 
     } catch (err: any) {
       console.error(err);
