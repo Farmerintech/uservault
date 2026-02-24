@@ -88,7 +88,7 @@ export default function Header() {
 export const Footer =()=>{
   return (
     <footer id="contact" className="bg-slate-950 border-t border-slate-800 py-12 text-slate-400">
-      <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-8">
+      {/* <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-8">
         <div>
           <h4 className="lg:text-xl md:text-lg font-bold text-[#46B35C] mb-3">UserVault</h4>
           <p className="text-sm">Smart connectivity platform.</p>
@@ -122,9 +122,9 @@ export const Footer =()=>{
             <li>Nigeria</li>
           </ul>
         </div>
-      </div>
+      </div> */}
 
-      <p className="text-center text-sm mt-10">© 2026 UserVolte. All rights reserved.</p>
+      <p className="text-center text-sm mt-10">© 2026 UserVault. All rights reserved.</p>
     </footer>
   );
 }

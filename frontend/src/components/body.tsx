@@ -20,7 +20,7 @@ export default function Main() {
 
             <div className="flex gap-4 flex-wrap">
               <button className="px-6 py-3 rounded-xl bg-[#46B35C] hover:bg-green-600">
-                Start Free Trial
+                <a href="/signup">Start Free Trial</a>
               </button>
               <button className="px-6 py-3 rounded-xl border border-slate-700 hover:border-[#46B35C]">
                 View Demo
@@ -122,10 +122,10 @@ export default function Main() {
       <section className="py-24 bg-gradient-to-r from-[#46B35C]  text-center">
         <h3 className="text-3xl md:text-4xl font-bold mb-6">Ready to Get Started?</h3>
         <p className="mb-8 text-lg text-white/90">
-          Join thousands building smarter systems with UserVolte.
+          Join thousands building smarter systems with UserVault.
         </p>
         <button className="px-8 py-3 bg-white text-slate-900 rounded-xl font-semibold hover:bg-slate-100">
-          Create Free Account
+          <a href="/signup">Create Free Account</a>
         </button>
       </section>
     </main>
