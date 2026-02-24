@@ -63,7 +63,7 @@ export const FaceVerify = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          emailFromQuery,
+          email:emailFromQuery,
           image: capturedImage,
         }),
       });
