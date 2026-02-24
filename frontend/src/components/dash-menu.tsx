@@ -1,11 +1,10 @@
 import { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { UserContext } from "../context/provider";
-import { BiFile, BiHome } from "react-icons/bi";
+import { BiFile, BiHome, BiUser } from "react-icons/bi";
 import {
   MdChevronLeft,
   MdOutlinePostAdd,
-  MdOutlineShoppingBag,
   MdOutlineLogout,
   MdMenu,
 } from "react-icons/md";
@@ -33,7 +32,7 @@ export const DashMenu = ({ aditiionalStyle }: any) => {
     { name: "Home", icon: <BiHome />, path: "/user/dashboard" },
     { name: "Add New File", icon: <MdOutlinePostAdd />, path: "/user/ad_file" },
     { name: "My Files", icon: <BiFile />, path: "/user/my_file" },
-    { name: "My Profile", icon: <MdOutlineShoppingBag />, path: "/user/my_profile" },
+    { name: "My Profile", icon: <BiUser />, path: "/user/my_profile" },
   ];
 
   return (
