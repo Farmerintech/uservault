@@ -3,8 +3,8 @@ import * as canvas from "canvas";
 import path from "path";
 import fs from "fs";
 import axios from "axios";
-import '@tensorflow/tfjs-node'; // important for Node.js
-
+// import '@tensorflow/tfjs-node'; // important for Node.js
+import * as tf from '@tensorflow/tfjs'
 const { Canvas, Image, ImageData } = canvas;
 
 // Monkey patch face-api.js for Node environment
