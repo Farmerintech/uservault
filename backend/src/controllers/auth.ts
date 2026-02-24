@@ -9,7 +9,6 @@ import { generateOTP } from "../utils/generateOtp";
 import { getOtpEmailHTML, Resethtml } from "../utils/html";
 import { Document } from "mongoose";
 import { decryptData, encryptData } from "../utils/crypto";
-import { loadFaceModels, modelsLoaded, loadImageFromBase64, loadImageFromUrl, getFaceSimilarity } from "../utils/face";
 
 export interface AuthUser {
   id: string;
@@ -337,25 +336,19 @@ export const deleteAllUsers = async (req: any, res: Response) => {
 
 
 // ✅ Load models once at server start
-loadFaceModels().catch(err => console.error(err));
+import { loadFaceModels, loadImageFromBase64, loadImageFromUrl, getFaceSimilarity } from "../utils/face";
 
-export const compareFaceController = async (req: Request, res: Response) => {
+export const compareFaceController = async (req:Request, res:Response) => {
   try {
     const { email, image } = req.body;
 
-    if (!email || !image) {
-      return res.status(400).json({ message: "Email and image required" });
-    }
+    if (!email || !image) return res.status(400).json({ message: "Email and image required" });
 
-    if (!modelsLoaded) {
-      return res.status(503).json({ message: "Face models not loaded yet, try again later" });
-    }
+    // Load models first
+    await loadFaceModels();
 
     const user = await users.findOne({ email });
-
-    if (!user || !user.faceImage) {
-      return res.status(404).json({ message: "User face not found" });
-    }
+    if (!user || !user.faceImage) return res.status(404).json({ message: "User face not found" });
 
     const img1 = await loadImageFromBase64(image);
     const img2 = await loadImageFromUrl(user.faceImage);
@@ -365,10 +358,10 @@ export const compareFaceController = async (req: Request, res: Response) => {
     return res.json({
       success: true,
       similarity: similarity.toFixed(2),
-      verified: similarity > 75, // threshold
+      verified: similarity > 75,
     });
-  } catch (err: any) {
-    console.error("Face verification failed:", err);
-    return res.status(500).json({ message: err.message || "Internal server error" });
+  } catch (err:any) {
+    console.error(err);
+    return res.status(500).json({ message: err.message });
   }
 };
