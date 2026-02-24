@@ -76,7 +76,8 @@ export const FaceVerify = () => {
 
       if (data.verified) {
         setResult(`✅ Face Verified (${data.similarity}%)`);
-        navigate(`/signin`); // Navigate to dashboard
+        alert(result)
+        navigate(`/user/dashbaord`); // Navigate to dashboard
       } else {
         setResult(`❌ Face Not Matched (${data.similarity}%)`);
       }
