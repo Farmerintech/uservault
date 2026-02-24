@@ -85,7 +85,7 @@ export default function ProfilePage() {
   if (error) return <p className="text-red-600">{error}</p>;
 
   return (
-    <div className="max-w-md mx-auto p-5 border rounded shadow-md mt-5">
+    <div className="max-w-md mx-auto p-5 rounded shadow-md mt-5">
       <h1 className="text-2xl font-bold mb-3">My Profile</h1>
 
       {/* Display profile info */}
