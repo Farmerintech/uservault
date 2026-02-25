@@ -1,47 +1,39 @@
+// middleware/auth.middleware.ts
+
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-
 export interface AuthRequest extends Request {
   user?: any;
 }
-
-export const authMiddleWare = (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): void => {
+export const protect = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    let token: string | undefined;
-
-    /* ---------- GET TOKEN ---------- */
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
-    ) {
-      token = req.headers.authorization.split(" ")[1];
-    }
+    const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
-      res.status(401).json({
-        success: false,
-        message: "Not authorized, no token",
+      return res.status(401).json({
+        message: "Not authorized",
       });
-      return;
     }
 
-    /* ---------- VERIFY TOKEN ---------- */
-    const decoded = jwt.verify(
+    const decoded: any = jwt.verify(
       token,
       process.env.JWT_SECRET as string
     );
 
-    req.user = decoded;
+    // Only allow full authentication
+    if (decoded.authLevel !== 2) {
+      return res.status(403).json({
+        message: "Complete face verification",
+      });
+    }
+
+    req.user = decoded; // if using custom typing
 
     next();
+
   } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: "Not authorized, invalid token",
+    return res.status(401).json({
+      message: "Invalid token",
     });
   }
 };
