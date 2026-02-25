@@ -23,6 +23,7 @@ export interface AuthRequest extends Request {
 interface JwtPayload {
     id: any,
     email: string,
+    authLevel: number
 }
 
 /**
@@ -79,7 +80,8 @@ export const loginUser = async (
     }
     const payload: JwtPayload = {
       id: user._id,
-      email:user.email
+      email:user.email,
+      authLevel: 1,
     };
     /* ---------- GENERATE TOKEN ---------- */
    const JWT_SECRET = process.env.JWT_SECRET as string;
@@ -96,7 +98,7 @@ export const loginUser = async (
     /* ---------- RESPONSE ---------- */
     res.status(200).json({
       success: true,
-      message: "Login successful",
+      message: "Password verified. Proceed to face verification.",
       token,
       user: {
         id: user._id,
@@ -343,23 +345,71 @@ export const compareFaceController = async (req:Request, res:Response) => {
     const { email, image } = req.body;
 
     if (!email || !image) return res.status(400).json({ message: "Email and image required" });
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+     const decoded: any = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string
+    );
 
+    // Must be authLevel 1
+    if (decoded.authLevel !== 1) {
+      return res.status(403).json({
+        message: "Invalid authentication stage",
+      });
+    }
     // Load models first
     await loadFaceModels();
 
-    const user = await users.findOne({ email });
-    if (!user || !user.faceImage) return res.status(404).json({ message: "User face not found" });
-
+    const user = await users.findById(decoded.id);
+    if (!user || !user.faceImage) {
+      return res.status(404).json({
+        message: "User face not found",
+      });
+    }
     const img1 = await loadImageFromBase64(image);
     const img2 = await loadImageFromUrl(user.faceImage);
 
     const similarity = await getFaceSimilarity(img1, img2);
+     if (similarity <= 75) {
+      return res.status(401).json({
+        success: false,
+        message: "Face verification failed",
+        verified: similarity > 75,
+      });
+    }
+    const payload: JwtPayload = {
+      id: user._id,
+      email:user.email,
+      authLevel: 1,
+    };
+    /* ---------- GENERATE TOKEN ---------- */
+   const JWT_SECRET = process.env.JWT_SECRET as string;
+   const JWT_EXPIRES = process.env.JWT_EXPIRES_IN as string;
 
-    return res.json({
+   const finalToken = jwt.sign(
+  payload as object,
+  JWT_SECRET as jwt.Secret,
+  {
+    expiresIn: JWT_EXPIRES,
+  } as jwt.SignOptions
+);
+
+    /* ---------- RESPONSE ---------- */
+    res.status(200).json({
       success: true,
-      similarity: similarity.toFixed(2),
-      verified: similarity > 75,
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        token:finalToken
+      },
     });
+
   } catch (err:any) {
     console.error(err);
     return res.status(500).json({ message: err.message });

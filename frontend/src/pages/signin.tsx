@@ -1,7 +1,6 @@
-import { useContext, useState } from "react";
+import {  useState } from "react";
 import bgImage from "../assets/login.png";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { UserContext } from "../context/provider";
 import { BaseURL } from "../components/api";
 import { Link, useNavigate } from "react-router";
 
@@ -16,7 +15,6 @@ export const Login = () => {
   const [show, setShow] = useState(false);
 
   const navigate = useNavigate();
-  const { dispatch } = useContext(UserContext);
 
   /* ================= HANDLERS ================= */
 
@@ -34,31 +32,30 @@ export const Login = () => {
   //   setIsLoading(false);
   // };
 
+const [showFaceModal, setShowFaceModal] = useState(false);
+const [tempToken, setTempToken] = useState("");
+
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
   setIsLoading(true);
   setMsg("");
 
-  // -------------------
-  // Validation
-  // -------------------
   if (!form.email) {
     setIsLoading(false);
     return setMsg("Email is required");
   }
+
   if (!form.password) {
     setIsLoading(false);
     return setMsg("Password is required");
   }
+
   if (form.password.length < 8) {
     setIsLoading(false);
     return setMsg("Password must be at least 8 characters");
   }
 
-  // -------------------
-  // API call
-  // -------------------
   try {
     const res = await fetch(`${BaseURL}/auth/login`, {
       method: "POST",
@@ -68,27 +65,16 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     const data = await res.json();
 
-    console.log("Login response:", data);
-
     if (!res.ok) {
-      // Show backend message if available
       return setMsg(data.message || "Login failed");
     }
 
-    // -------------------
-    // Save user & redirect
-    // -------------------
-    dispatch({ type: "Login", payload: {
-      email:data.user.email,
-      token:data.user.token,
-      username:data.user.username,
-      id:data.user._id
-    } });
-    localStorage.setItem("user", JSON.stringify(data.user));
-  navigate(`/user/verify_face?email=${form.email}`); // Navigate to dashboard
+    // ✅ Step 1 success
+    setTempToken(data.token);
+    setShowFaceModal(true);
 
   } catch (err) {
-    console.error("Login error:", err);
+    console.error(err);
     setMsg("Network error. Please try again.");
   } finally {
     setIsLoading(false);
@@ -131,7 +117,33 @@ const handleVerifyNow = async () => {
 };
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
+{
+  showFaceModal && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="bg-white rounded-xl p-8 max-w-sm text-center shadow-2xl">
+        <h3 className="text-2xl font-bold mb-4 text-green-600">
+          Account Verified ✅
+        </h3>
 
+        <p className="text-gray-700 mb-6">
+          Password verified successfully.  
+          Proceed to face verification to complete login.
+        </p>
+
+        <button
+          onClick={() => {
+            // Save temp token temporarily
+            sessionStorage.setItem("tempToken", tempToken);
+            navigate("/user/verify_face");
+          }}
+          className="px-6 py-2 bg-[#46B35C] text-white rounded-lg hover:bg-green-600 font-semibold"
+        >
+          Proceed to Face Verification
+        </button>
+      </div>
+    </div>
+  )
+}
       {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center scale-110 blur-sm"

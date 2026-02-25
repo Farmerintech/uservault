@@ -1,26 +1,43 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useContext, useEffect } from "react";
 import bgImage from "../assets/login.png";
 import { BaseURL } from "../components/api";
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
+import { UserContext } from "../context/provider";
 
 export const FaceVerify = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-//   const [email, setEmail] = useState("");
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+  const { dispatch } = useContext(UserContext);
+
+  // 🔐 Get temporary token
+  const tempToken = sessionStorage.getItem("tempToken");
+
+  // If no temp token, redirect to login
+  useEffect(() => {
+    if (!tempToken) {
+      navigate("/login");
+    }
+  }, [tempToken, navigate]);
+
   // ---------------- START CAMERA ----------------
   const startCamera = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      setResult("Camera access denied.");
     }
   };
 
-  // ---------------- CAPTURE ----------------
+  // ---------------- CAPTURE IMAGE ----------------
   const captureImage = () => {
     if (!videoRef.current || !canvasRef.current) return;
 
@@ -41,29 +58,35 @@ export const FaceVerify = () => {
     const imageData = canvasRef.current.toDataURL("image/jpeg");
     setCapturedImage(imageData);
 
-    // stop camera
+    // Stop camera
     const stream = videoRef.current.srcObject as MediaStream;
     stream?.getTracks().forEach((track) => track.stop());
   };
-  const [searchParams] = useSearchParams();
-  const emailFromQuery = searchParams.get("email") || "";
-  const navigate = useNavigate();
 
   // ---------------- VERIFY FACE ----------------
   const verifyFace = async () => {
-    if (!emailFromQuery || !capturedImage) return;
+    if (!capturedImage) {
+      setResult("Please capture your face first.");
+      return;
+    }
+
+    if (!tempToken) {
+      setResult("Session expired. Please login again.");
+      navigate("/login");
+      return;
+    }
 
     setLoading(true);
     setResult(null);
 
     try {
-      const res = await fetch(`${BaseURL}/auth/compare_face`, {
+      const res = await fetch(`${BaseURL}/auth/verify-face`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${tempToken}`,
         },
         body: JSON.stringify({
-          email:emailFromQuery,
           image: capturedImage,
         }),
       });
@@ -71,16 +94,31 @@ export const FaceVerify = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message);
+        throw new Error(data.message || "Face verification failed");
       }
 
-      if (data.verified) {
-        setResult(`✅ Face Verified (${data.similarity}%)`);
-        alert(result)
-        navigate(`/user/dashbaord`); // Navigate to dashboard
-      } else {
-        setResult(`❌ Face Not Matched (${data.similarity}%)`);
-      }
+      // ✅ FINAL TOKEN RECEIVED
+      const userData = {
+        id: data.user.id,
+        email: data.user.email,
+        username: data.user.username,
+        token: data.token,
+      };
+
+      // Save to context state
+      dispatch({ type: "Login", payload: userData });
+
+      // Save to localStorage
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      // Remove temp token
+      sessionStorage.removeItem("tempToken");
+
+      setResult("✅ Face Verified Successfully");
+
+      setTimeout(() => {
+        navigate("/user/dashboard");
+      }, 1000);
 
     } catch (err: any) {
       setResult(`❌ ${err.message}`);
@@ -106,22 +144,14 @@ export const FaceVerify = () => {
             Face Verification 🔍
           </h2>
 
-          {/* Email */}
-          {/* <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 mb-4 rounded bg-white/20 outline-none"
-          /> */}
           {!capturedImage && (
-
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full rounded-lg border mb-4"
-          />)}
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="w-full rounded-lg border mb-4"
+            />
+          )}
 
           <canvas ref={canvasRef} style={{ display: "none" }} />
 
@@ -134,27 +164,42 @@ export const FaceVerify = () => {
           )}
 
           <div className="flex flex-col gap-3">
-            <button
-              onClick={startCamera}
-              className="w-full py-2 bg-gray-600 rounded-lg"
-            >
-              Start Camera
-            </button>
+            {!capturedImage && (
+              <>
+                <button
+                  onClick={startCamera}
+                  className="w-full py-2 bg-gray-600 rounded-lg"
+                >
+                  Start Camera
+                </button>
 
-            <button
-              onClick={captureImage}
-              className="w-full py-2 bg-blue-500 rounded-lg"
-            >
-              Capture Face
-            </button>
+                <button
+                  onClick={captureImage}
+                  className="w-full py-2 bg-blue-500 rounded-lg"
+                >
+                  Capture Face
+                </button>
+              </>
+            )}
 
-            <button
-              onClick={verifyFace}
-              disabled={loading}
-              className="w-full py-2 bg-green-600 rounded-lg disabled:opacity-60"
-            >
-              Verify Face
-            </button>
+            {capturedImage && (
+              <>
+                <button
+                  onClick={() => setCapturedImage(null)}
+                  className="w-full py-2 bg-yellow-500 rounded-lg"
+                >
+                  Retake
+                </button>
+
+                <button
+                  onClick={verifyFace}
+                  disabled={loading}
+                  className="w-full py-2 bg-green-600 rounded-lg disabled:opacity-60"
+                >
+                  {loading ? "Verifying..." : "Verify Face"}
+                </button>
+              </>
+            )}
           </div>
 
           {result && (
@@ -166,7 +211,6 @@ export const FaceVerify = () => {
         </div>
       </div>
 
-      {/* 🔥 VERIFYING MODAL */}
       {loading && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-white text-black px-6 py-4 rounded-xl shadow-xl">
