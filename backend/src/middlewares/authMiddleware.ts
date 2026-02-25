@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 export interface AuthRequest extends Request {
   user?: any;
 }
-export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authMiddleWare = (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
 
