@@ -342,9 +342,9 @@ import { loadFaceModels, loadImageFromBase64, loadImageFromUrl, getFaceSimilarit
 
 export const compareFaceController = async (req:Request, res:Response) => {
   try {
-    const { email, image } = req.body;
+    const { image } = req.body;
 
-    if (!email || !image) return res.status(400).json({ message: "Email and image required" });
+    if ( !image) return res.status(400).json({ message: "Email and image required" });
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
       return res.status(401).json({ message: "Unauthorized" });

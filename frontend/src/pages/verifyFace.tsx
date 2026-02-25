@@ -80,7 +80,7 @@ export const FaceVerify = () => {
     setResult(null);
 
     try {
-      const res = await fetch(`${BaseURL}/auth/verify-face`, {
+      const res = await fetch(`${BaseURL}/auth/compare_face`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
