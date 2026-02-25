@@ -391,7 +391,7 @@ export const compareFaceController = async (req:Request, res:Response) => {
     const payload: JwtPayload = {
       id: user._id,
       email:user.email,
-      authLevel: 1,
+      authLevel: 2,
     };
     /* ---------- GENERATE TOKEN ---------- */
    const JWT_SECRET = process.env.JWT_SECRET as string;
