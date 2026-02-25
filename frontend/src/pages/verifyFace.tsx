@@ -116,7 +116,7 @@ const captureImage = () => {
         id: data.user.id,
         email: data.user.email,
         username: data.user.username,
-        token: data.token,
+        token: data.user.token,
       };
 
       // Save to context state
