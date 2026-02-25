@@ -385,7 +385,7 @@ export const compareFaceController = async (req:Request, res:Response) => {
       return res.status(401).json({
         success: false,
         message: `Face verification failed ${similarity}`,
-        verified: similarity > 75,
+        verified: similarity > 65,
       });
     }
     const payload: JwtPayload = {
