@@ -38,31 +38,45 @@ export const FaceVerify = () => {
   };
 
   // ---------------- CAPTURE IMAGE ----------------
-  const captureImage = () => {
-    if (!videoRef.current || !canvasRef.current) return;
+// ---------------- CAPTURE IMAGE WITH RESIZE & COMPRESSION ----------------
+const captureImage = () => {
+  if (!videoRef.current || !canvasRef.current) return;
 
-    const ctx = canvasRef.current.getContext("2d");
-    if (!ctx) return;
+  const MAX_WIDTH = 300;
+  const MAX_HEIGHT = 300;
 
-    canvasRef.current.width = videoRef.current.videoWidth;
-    canvasRef.current.height = videoRef.current.videoHeight;
+  let width = videoRef.current.videoWidth;
+  let height = videoRef.current.videoHeight;
 
-    ctx.drawImage(
-      videoRef.current,
-      0,
-      0,
-      canvasRef.current.width,
-      canvasRef.current.height
-    );
+  // Maintain aspect ratio
+  if (width > height) {
+    if (width > MAX_WIDTH) {
+      height = (height * MAX_WIDTH) / width;
+      width = MAX_WIDTH;
+    }
+  } else {
+    if (height > MAX_HEIGHT) {
+      width = (width * MAX_HEIGHT) / height;
+      height = MAX_HEIGHT;
+    }
+  }
 
-    const imageData = canvasRef.current.toDataURL("image/jpeg");
-    setCapturedImage(imageData);
+  canvasRef.current.width = width;
+  canvasRef.current.height = height;
 
-    // Stop camera
-    const stream = videoRef.current.srcObject as MediaStream;
-    stream?.getTracks().forEach((track) => track.stop());
-  };
+  const ctx = canvasRef.current.getContext("2d");
+  if (!ctx) return;
 
+  ctx.drawImage(videoRef.current, 0, 0, width, height);
+
+  // Compress image to 70% quality
+  const imageData = canvasRef.current.toDataURL("image/jpeg", 0.7);
+  setCapturedImage(imageData);
+
+  // Stop camera
+  const stream = videoRef.current.srcObject as MediaStream;
+  stream?.getTracks().forEach((track) => track.stop());
+};
   // ---------------- VERIFY FACE ----------------
   const verifyFace = async () => {
     if (!capturedImage) {
