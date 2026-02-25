@@ -30,6 +30,7 @@ credentials: {
     counter: number;
   }[];
   faceImage:any
+  isCompleted:boolean
 }
 
 const VerificationOtpSchema: Schema = new Schema(
@@ -81,7 +82,10 @@ const UserSchema: Schema = new Schema(
       type: ResetOtpSchema,
       default: {}
     },
-
+    isCompleted:{
+      type:Boolean,
+      default: false
+    },
     access_code: {
       type: String
     },

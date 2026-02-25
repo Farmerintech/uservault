@@ -147,7 +147,6 @@ export const saveFace = async (req: Request, res: Response) => {
     if (!faceImage) {
       return res.status(400).json({ message: "Face image URL is required" });
     }
-
     // Optional: ensure it's from Cloudinary
     if (!faceImage.includes("res.cloudinary.com")) {
       return res.status(400).json({
@@ -158,7 +157,7 @@ export const saveFace = async (req: Request, res: Response) => {
     // ------------------ UPDATE USER ------------------
     const user = await users.findByIdAndUpdate(
       isUser._id,
-      { faceImage },
+      { faceImage, isCompleted:true },
       { new: true }
     );
 

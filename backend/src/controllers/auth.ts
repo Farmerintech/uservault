@@ -78,6 +78,14 @@ export const loginUser = async (
       });
       return;
     }
+     const iscompleted = user.isCompleted;
+    if(!iscompleted){
+       res.status(401).json({
+        success: false,
+        message: "You have not yet complete face biometric, proceed to face biometric",
+      });
+      return;
+    }
     const payload: JwtPayload = {
       id: user._id,
       email:user.email,
