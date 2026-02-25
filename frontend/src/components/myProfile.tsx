@@ -6,6 +6,7 @@ interface User {
 user:any;
   username: string;
   email: string;
+  faceImage:string
 }
 
 interface UpdateResponse {
@@ -87,7 +88,7 @@ export default function ProfilePage() {
   return (
     <div className="max-w-md mx-auto p-5 rounded shadow-md mt-5">
       <h1 className="text-2xl font-bold mb-3">My Profile</h1>
-
+      <img src ={user?.faceImage}/>
       {/* Display profile info */}
       <div className="mb-5">
         <p>

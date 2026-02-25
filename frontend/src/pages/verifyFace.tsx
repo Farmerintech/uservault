@@ -228,8 +228,9 @@ const captureImage = () => {
       {loading && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-white text-black px-6 py-4 rounded-xl shadow-xl">
+            <p className="animate-pulse font-semibold">Verifying Face...</p>
             <p className="animate-pulse font-semibold">
-              Verifying Face...
+              We are collecting your biometric to verifyif its you, this may take a while. 
             </p>
           </div>
         </div>
