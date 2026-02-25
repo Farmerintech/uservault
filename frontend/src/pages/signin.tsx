@@ -34,7 +34,7 @@ export const Login = () => {
 
 const [showFaceModal, setShowFaceModal] = useState(false);
 const [tempToken, setTempToken] = useState("");
-
+ const [regModal, seRegModal] = useState(false);
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
@@ -64,7 +64,9 @@ const handleSubmit = async (e: React.FormEvent) => {
     });
 
     const data = await res.json();
-
+    if(data.message ==='You have not yet complete face biometric, proceed to face capturing'){
+      seRegModal(true)
+    }
     if (!res.ok) {
       return setMsg(data.message || "Login failed");
     }
@@ -83,6 +85,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   /* ================= UI ================= */
 
   const [isVerifying, setIsVerifying] = useState(false); // new state for OTP
+ 
 const handleVerifyNow = async () => {
   if (!form.email) {
     return setMsg("Please enter your email to receive OTP");
@@ -117,6 +120,32 @@ const handleVerifyNow = async () => {
 };
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
+    {
+  regModal && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="bg-white rounded-xl p-8 max-w-sm text-center shadow-2xl">
+        <h3 className="text-2xl font-bold mb-4 text-green-600">
+          Uncomplete Account
+        </h3>
+
+        <p className="text-gray-700 mb-6">
+          Proceed to face Capturing to complete account creation.
+        </p>
+
+        <button
+          onClick={() => {
+            // Save temp token temporarily
+            sessionStorage.setItem("tempToken", tempToken);
+            navigate(`/user/biometric?email=${form.email}`);
+          }}
+          className="px-6 py-2 bg-[#46B35C] text-white rounded-lg hover:bg-green-600 font-semibold"
+        >
+          Proceed to Face Verification
+        </button>
+      </div>
+    </div>
+  )
+}
 {
   showFaceModal && (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">

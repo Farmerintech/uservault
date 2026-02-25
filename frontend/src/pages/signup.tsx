@@ -56,8 +56,8 @@ export const SignUp = () => {
         }),
       });
        const data = await res.json();
-      console.log(data)
-      setMsg(data.message)
+      console.log(data);
+      setMsg(data.message);
       if (!res.ok) throw new Error();
 
       navigate(`/confirm_email?email=${form.email}`);
