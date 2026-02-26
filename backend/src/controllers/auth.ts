@@ -381,7 +381,7 @@ export const compareFaceController = async (req:Request, res:Response) => {
     const img2 = await loadImageFromUrl(user.faceImage);
 
     const similarity = await getFaceSimilarity(img1, img2);
-     if (similarity <= 75) {
+     if (similarity <= 65) {
       return res.status(401).json({
         success: false,
         message: `Face verification failed ${similarity}`,
