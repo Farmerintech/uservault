@@ -391,7 +391,7 @@ export const compareFaceController = async (req: Request, res: Response) => {
     const result = await response.json();
 
     if (!result.similarity) {
-      return res.status(400).json({ message: "Face comparison failed" });
+      return res.status(400).json({ message: "Face comparison failed", result});
     }
 
     const similarity = result.similarity * 100;
