@@ -430,7 +430,7 @@ export const compareFaceController = async (req: any, res: Response) => {
     console.log("Luxand API raw response:", result);
 
     // ------------------ 6️⃣ HANDLE LUXAND ERROR ------------------
-    if (!result || result.status === "failure" || !result.similarity) {
+    if (!result || result.similar === false || !result.score) {
       return res.status(400).json({
         message: "Face comparison failed",
         luxandResult: result,
