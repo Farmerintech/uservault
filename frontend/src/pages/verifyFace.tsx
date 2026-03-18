@@ -8,17 +8,15 @@ export const FaceVerify = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [capturedImage, setCapturedImage] = useState<Blob | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const { dispatch } = useContext(UserContext);
 
-  // 🔐 Get temporary token
   const tempToken = sessionStorage.getItem("tempToken");
 
-  // If no temp token, redirect to login
   useEffect(() => {
     if (!tempToken) {
       navigate("/login");
@@ -29,54 +27,53 @@ export const FaceVerify = () => {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
+      if (videoRef.current) videoRef.current.srcObject = stream;
     } catch (err) {
       setResult("Camera access denied.");
     }
   };
 
   // ---------------- CAPTURE IMAGE ----------------
-// ---------------- CAPTURE IMAGE WITH RESIZE & COMPRESSION ----------------
-const captureImage = () => {
-  if (!videoRef.current || !canvasRef.current) return;
+  const captureImage = () => {
+    if (!videoRef.current || !canvasRef.current) return;
 
-  const MAX_WIDTH = 300;
-  const MAX_HEIGHT = 300;
+    const MAX_WIDTH = 300;
+    const MAX_HEIGHT = 300;
 
-  let width = videoRef.current.videoWidth;
-  let height = videoRef.current.videoHeight;
+    let width = videoRef.current.videoWidth;
+    let height = videoRef.current.videoHeight;
 
-  // Maintain aspect ratio
-  if (width > height) {
-    if (width > MAX_WIDTH) {
-      height = (height * MAX_WIDTH) / width;
-      width = MAX_WIDTH;
+    // Maintain aspect ratio
+    if (width > height) {
+      if (width > MAX_WIDTH) {
+        height = (height * MAX_WIDTH) / width;
+        width = MAX_WIDTH;
+      }
+    } else {
+      if (height > MAX_HEIGHT) {
+        width = (width * MAX_HEIGHT) / height;
+        height = MAX_HEIGHT;
+      }
     }
-  } else {
-    if (height > MAX_HEIGHT) {
-      width = (width * MAX_HEIGHT) / height;
-      height = MAX_HEIGHT;
-    }
-  }
 
-  canvasRef.current.width = width;
-  canvasRef.current.height = height;
+    canvasRef.current.width = width;
+    canvasRef.current.height = height;
 
-  const ctx = canvasRef.current.getContext("2d");
-  if (!ctx) return;
+    const ctx = canvasRef.current.getContext("2d");
+    if (!ctx) return;
 
-  ctx.drawImage(videoRef.current, 0, 0, width, height);
+    ctx.drawImage(videoRef.current, 0, 0, width, height);
 
-  // Compress image to 70% quality
-  const imageData = canvasRef.current.toDataURL("image/jpeg", 1);
-  setCapturedImage(imageData);
+    // Convert canvas to Blob
+    canvasRef.current.toBlob((blob) => {
+      if (blob) setCapturedImage(blob);
+    }, "image/jpeg", 1);
 
-  // Stop camera
-  const stream = videoRef.current.srcObject as MediaStream;
-  stream?.getTracks().forEach((track) => track.stop());
-};
+    // Stop camera
+    const stream = videoRef.current.srcObject as MediaStream;
+    stream?.getTracks().forEach((track) => track.stop());
+  };
+
   // ---------------- VERIFY FACE ----------------
   const verifyFace = async () => {
     if (!capturedImage) {
@@ -94,15 +91,15 @@ const captureImage = () => {
     setResult(null);
 
     try {
+      const formData = new FormData();
+      formData.append("image", capturedImage, "selfie.jpg"); // Field name must match Multer
+
       const res = await fetch(`${BaseURL}/auth/compare_face`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${tempToken}`,
+          Authorization: `Bearer ${tempToken}`, // DO NOT set Content-Type; browser handles it
         },
-        body: JSON.stringify({
-          image: capturedImage,
-        }),
+        body: formData,
       });
 
       const data = await res.json();
@@ -111,7 +108,6 @@ const captureImage = () => {
         throw new Error(data.message || "Face verification failed");
       }
 
-      // ✅ FINAL TOKEN RECEIVED
       const userData = {
         id: data.user.id,
         email: data.user.email,
@@ -119,13 +115,8 @@ const captureImage = () => {
         token: data.user.token,
       };
 
-      // Save to context state
       dispatch({ type: "Login", payload: userData });
-
-      // Save to localStorage
       localStorage.setItem("user", JSON.stringify(userData));
-
-      // Remove temp token
       sessionStorage.removeItem("tempToken");
 
       setResult("✅ Face Verified Successfully");
@@ -133,7 +124,6 @@ const captureImage = () => {
       setTimeout(() => {
         navigate("/user/dashboard");
       }, 1000);
-
     } catch (err: any) {
       setResult(`❌ ${err.message}`);
     } finally {
@@ -143,8 +133,6 @@ const captureImage = () => {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
-
-      {/* Background */}
       <div
         className="absolute inset-0 bg-cover bg-center scale-110 blur-sm"
         style={{ backgroundImage: `url(${bgImage})` }}
@@ -153,7 +141,6 @@ const captureImage = () => {
 
       <div className="relative z-10 w-full max-w-md px-6">
         <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-2xl p-8 text-white">
-
           <h2 className="text-3xl font-bold text-center mb-6">
             Face Verification 🔍
           </h2>
@@ -171,40 +158,27 @@ const captureImage = () => {
 
           {capturedImage && (
             <img
-              src={capturedImage}
+              src={URL.createObjectURL(capturedImage)}
               alt="Captured"
               className="w-full rounded-lg mb-4"
             />
           )}
 
           <div className="flex flex-col gap-3">
-            {!capturedImage && (
+            {!capturedImage ? (
               <>
-                <button
-                  onClick={startCamera}
-                  className="w-full py-2 bg-gray-600 rounded-lg"
-                >
+                <button onClick={startCamera} className="w-full py-2 bg-gray-600 rounded-lg">
                   Start Camera
                 </button>
-
-                <button
-                  onClick={captureImage}
-                  className="w-full py-2 bg-blue-500 rounded-lg"
-                >
+                <button onClick={captureImage} className="w-full py-2 bg-blue-500 rounded-lg">
                   Capture Face
                 </button>
               </>
-            )}
-
-            {capturedImage && (
+            ) : (
               <>
-                <button
-                  onClick={() => setCapturedImage(null)}
-                  className="w-full py-2 bg-yellow-500 rounded-lg"
-                >
+                <button onClick={() => setCapturedImage(null)} className="w-full py-2 bg-yellow-500 rounded-lg">
                   Retake
                 </button>
-
                 <button
                   onClick={verifyFace}
                   disabled={loading}
@@ -216,12 +190,7 @@ const captureImage = () => {
             )}
           </div>
 
-          {result && (
-            <p className="mt-4 text-center font-semibold">
-              {result}
-            </p>
-          )}
-
+          {result && <p className="mt-4 text-center font-semibold">{result}</p>}
         </div>
       </div>
 
@@ -230,7 +199,7 @@ const captureImage = () => {
           <div className="bg-white text-black px-6 py-4 rounded-xl shadow-xl">
             <p className="animate-pulse font-semibold text-center">Verifying Face...</p>
             <p className="animate-pulse font-semibold text-center">
-              We are collecting your biometric to verifyif its you, this may take a while. 
+              We are collecting your biometric to verify if it's you. This may take a while.
             </p>
           </div>
         </div>
