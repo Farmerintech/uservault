@@ -404,7 +404,8 @@ export const compareFaceController = async (req: any, res: Response) => {
     console.log("Luxand API raw response:", result);
 
     if (!result.similarity) {
-      return res.status(400).json({ message: "Face comparison failed", luxandResult: result });
+      return res.status(400).json({ message: "Face comparison failed", luxandResult: result, 
+        images: `${user.faceImage, req.file}`});
     }
 
     const similarity = result.similarity * 100;
