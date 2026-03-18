@@ -112,7 +112,7 @@ export const FaceVerify = () => {
         id: data.user.id,
         email: data.user.email,
         username: data.user.username,
-        token: data.user.token,
+        token: data.token || data.user.token,
       };
 
       dispatch({ type: "Login", payload: userData });
