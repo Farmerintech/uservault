@@ -70,7 +70,7 @@ const captureImage = () => {
   ctx.drawImage(videoRef.current, 0, 0, width, height);
 
   // Compress image to 70% quality
-  const imageData = canvasRef.current.toDataURL("image/jpeg", 0.7);
+  const imageData = canvasRef.current.toDataURL("image/jpeg", 1);
   setCapturedImage(imageData);
 
   // Stop camera
