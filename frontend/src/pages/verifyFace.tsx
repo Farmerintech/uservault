@@ -125,7 +125,7 @@ export const FaceVerify = () => {
         navigate("/user/dashboard");
       }, 1000);
     } catch (err: any) {
-      setResult(`❌ ${err.message}`);
+      setResult(`❌ ${err.message} ${err.luxandResult}`);
     } finally {
       setLoading(false);
     }
