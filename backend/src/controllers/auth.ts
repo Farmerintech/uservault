@@ -376,7 +376,7 @@ export const compareFaceController = async (req: any, res: Response) => {
     formData.append("face2", user.faceImage);
 
     // --- Send request to Luxand ---
-    const response = await fetch("https://api.luxand.cloud/photo/landmarks", {
+    const response = await fetch("https://api.luxand.cloud/photo/similarity", {
       method: "POST",
       headers: {
         token: process.env.LUXAND_API_KEY as string,
