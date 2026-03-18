@@ -438,7 +438,7 @@ export const compareFaceController = async (req: any, res: Response) => {
     }
 
     // ------------------ 7️⃣ VERIFY SIMILARITY ------------------
-    const similarity = result.similarity * 100;
+    const similarity = result.score * 100;
 
     if (similarity <= 65) {
       return res.status(401).json({
