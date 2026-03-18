@@ -349,10 +349,11 @@ export const deleteAllUsers = async (req: any, res: Response) => {
 
 import fetch from "node-fetch";
 import FormData from "form-data"; // Node.js version
-export const compareFaceController = async (req: Request, res: Response) => {
+
+// Middleware: upload.single('image') will put file in req.file
+export const compareFaceController = async (req: any, res: Response) => {
   try {
-    const { image } = req.body;
-    if (!image) return res.status(400).json({ message: "Image required" });
+    if (!req.file) return res.status(400).json({ message: "Image file required" });
 
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) return res.status(401).json({ message: "Unauthorized" });
@@ -363,35 +364,33 @@ export const compareFaceController = async (req: Request, res: Response) => {
     }
 
     const user = await users.findById(decoded.id);
-    if (!user || !user.faceImage) {
-      return res.status(404).json({ message: "User face not found" });
-    }
+    if (!user || !user.faceImage) return res.status(404).json({ message: "User face not found" });
 
-    // Convert base64 to Buffer
-    const base64ToBuffer = (base64: string) => {
-      const matches = base64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
-      const data = matches ? matches[2] : base64;
-      return Buffer.from(data, "base64");
-    };
-
-    // Node-form-data
+    // --- Prepare FormData ---
     const formData = new FormData();
-    formData.append("photo1", base64ToBuffer(image), { filename: "photo1.jpg" }); // <-- object for filename
-    formData.append("photo2", user.faceImage); // URL is fine as string
 
+    // Upload your file directly
+    formData.append("face1", req.file.buffer, { filename: req.file.originalname });
+
+    // User face: if it's a URL, send as string; else, you could load local file as buffer
+    formData.append("face2", user.faceImage);
+
+    // --- Send request to Luxand ---
     const response = await fetch("https://api.luxand.cloud/photo/compare", {
       method: "POST",
       headers: {
         token: process.env.LUXAND_API_KEY as string,
-        ...formData.getHeaders(), // Important for Node
+        ...formData.getHeaders(), // Important in Node
       },
       body: formData,
     });
 
     const result = await response.json();
 
+    console.log("Luxand API raw response:", result); // <-- See exact message
+
     if (!result.similarity) {
-      return res.status(400).json({ message: "Face comparison failed", result});
+      return res.status(400).json({ message: "Face comparison failed", luxandResult: result });
     }
 
     const similarity = result.similarity * 100;
@@ -400,6 +399,7 @@ export const compareFaceController = async (req: Request, res: Response) => {
         success: false,
         message: `Face verification failed. Similarity: ${similarity.toFixed(2)}%`,
         verified: false,
+        luxandResult: result,
       });
     }
 
@@ -408,9 +408,9 @@ export const compareFaceController = async (req: Request, res: Response) => {
       email: user.email,
       authLevel: 2,
     };
-const JWT_SECRET = process.env.JWT_SECRET as string; 
-const JWT_EXPIRES = process.env.JWT_EXPIRES_IN as string; 
-const finalToken = jwt.sign( payload as object, JWT_SECRET as jwt.Secret, 
+const JWT_SECRET = process.env.JWT_SECRET as string;
+ const JWT_EXPIRES = process.env.JWT_EXPIRES_IN as string; 
+ const finalToken = jwt.sign( payload as object, JWT_SECRET as jwt.Secret, 
   { expiresIn: JWT_EXPIRES, } as jwt.SignOptions );
 
     res.status(200).json({
@@ -423,6 +423,7 @@ const finalToken = jwt.sign( payload as object, JWT_SECRET as jwt.Secret,
         email: user.email,
       },
       similarity: similarity.toFixed(2),
+      luxandResult: result,
     });
 
   } catch (err: any) {
