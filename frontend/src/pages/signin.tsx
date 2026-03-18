@@ -249,6 +249,8 @@ const handleVerifyNow = async () => {
               onChange={handleChange}
               className="input-glass"
               placeholder="example@mail.com"
+              type="email"
+              required={true}
             />
           </div>
 

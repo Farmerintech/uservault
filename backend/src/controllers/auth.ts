@@ -368,9 +368,15 @@ export const compareFaceController = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User face not found" });
     }
 
+    const base64ToBuffer = (base64: string) => {
+  // Remove data URI prefix if it exists
+  const matches = base64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+  const data = matches ? matches[2] : base64;
+  return Buffer.from(data, "base64");
+};
     // Call Luxand API
     const formData = new FormData();
-    formData.append("photo1", image, "photo1.jpg"); // user-uploaded base64 file or Buffer
+    formData.append("photo1", base64ToBuffer(image), "photo1.jpg"); // user-uploaded base64 file or Buffer
     formData.append("photo2", user.faceImage); // stored URL of user's face
 
     const response = await fetch("https://api.luxand.cloud/photo/compare", {
