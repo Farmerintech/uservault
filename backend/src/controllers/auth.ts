@@ -349,48 +349,73 @@ export const deleteAllUsers = async (req: any, res: Response) => {
 
 import fetch from "node-fetch";
 import FormData from "form-data"; // Node.js version
+import axios from "axios";
 
 // Middleware: upload.single('image') will put file in req.file
 
 
 export const compareFaceController = async (req: any, res: Response) => {
   try {
-    // 1️⃣ Check uploaded image
+    // ------------------ 1️⃣ VALIDATE FILE ------------------
     if (!req.file) {
       return res.status(400).json({ message: "Image file required" });
     }
 
-    // 2️⃣ Verify JWT
+    console.log("Uploaded file:", {
+      type: req.file.mimetype,
+      size: req.file.size,
+    });
+
+    // ------------------ 2️⃣ VERIFY TOKEN ------------------
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) return res.status(401).json({ message: "Unauthorized" });
 
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
+
     if (decoded.authLevel !== 1) {
       return res.status(403).json({ message: "Invalid authentication stage" });
     }
 
-    // 3️⃣ Get user & check if face exists
+    // ------------------ 3️⃣ GET USER ------------------
     const user = await users.findById(decoded.id);
     if (!user || !user.faceImage) {
       return res.status(404).json({ message: "User face not found" });
     }
 
-    // 4️⃣ Prepare FormData for Luxand
+    console.log("User face URL:", user.faceImage);
+
+    // ------------------ 4️⃣ PREPARE FORMDATA ------------------
     const formData = new FormData();
 
-    // Uploaded file from memoryStorage
+    // 👉 face1 (uploaded image from frontend)
     formData.append("face1", req.file.buffer, {
-      filename: req.file.originalname,
+      filename: req.file.originalname || "selfie.jpg",
       contentType: req.file.mimetype,
     });
 
-    // User stored face (URL)
-    formData.append("face2", user.faceImage);
+    // 👉 face2 (convert Cloudinary URL → buffer)
+    let face2Buffer;
+
+    try {
+      const imageResponse = await axios.get(user.faceImage, {
+        responseType: "arraybuffer",
+      });
+
+      face2Buffer = imageResponse.data;
+    } catch (err) {
+      console.error("Failed to fetch face2 image:", err);
+      return res.status(500).json({ message: "Failed to load stored face image" });
+    }
+
+    formData.append("face2", face2Buffer, {
+      filename: "face2.jpg",
+      contentType: "image/jpeg",
+    });
 
     // Optional threshold
     formData.append("threshold", "0.8");
 
-    // 5️⃣ Send request to Luxand
+    // ------------------ 5️⃣ CALL LUXAND ------------------
     const response = await fetch("https://api.luxand.cloud/photo/similarity", {
       method: "POST",
       headers: {
@@ -401,13 +426,18 @@ export const compareFaceController = async (req: any, res: Response) => {
     });
 
     const result = await response.json();
-    console.log("Luxand API raw response:", result, user.faceImage, req.file);
 
-    if (!result.similarity) {
-      return res.status(400).json({ message: "Face comparison failed", luxandResult: result, 
-        images: `${user.faceImage, req.file}`});
+    console.log("Luxand API raw response:", result);
+
+    // ------------------ 6️⃣ HANDLE LUXAND ERROR ------------------
+    if (!result || result.status === "failure" || !result.similarity) {
+      return res.status(400).json({
+        message: "Face comparison failed",
+        luxandResult: result,
+      });
     }
 
+    // ------------------ 7️⃣ VERIFY SIMILARITY ------------------
     const similarity = result.similarity * 100;
 
     if (similarity <= 65) {
@@ -419,17 +449,20 @@ export const compareFaceController = async (req: any, res: Response) => {
       });
     }
 
-    // 6️⃣ Generate upgraded JWT for user
+    // ------------------ 8️⃣ GENERATE NEW TOKEN ------------------
     const payload: JwtPayload = {
       id: user._id,
       email: user.email,
       authLevel: 2,
     };
-    const JWT_SECRET = process.env.JWT_SECRET as string;
+
+     const JWT_SECRET = process.env.JWT_SECRET as string;
     const JWT_EXPIRES = process.env.JWT_EXPIRES_IN as string;
 const finalToken = jwt.sign( payload as object, JWT_SECRET as jwt.Secret, { expiresIn: JWT_EXPIRES, } as jwt.SignOptions );
-    // 7️⃣ Respond with success
-    res.status(200).json({
+  
+
+    // ------------------ 9️⃣ SUCCESS RESPONSE ------------------
+    return res.status(200).json({
       success: true,
       message: "Face verification successful",
       token: finalToken,
@@ -441,8 +474,9 @@ const finalToken = jwt.sign( payload as object, JWT_SECRET as jwt.Secret, { expi
       similarity: similarity.toFixed(2),
       luxandResult: result,
     });
+
   } catch (err: any) {
-    console.error(err);
-    res.status(500).json({ message: err.message });
+    console.error("Controller error:", err);
+    return res.status(500).json({ message: err.message });
   }
 };
