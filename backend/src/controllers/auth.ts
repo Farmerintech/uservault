@@ -346,12 +346,8 @@ export const deleteAllUsers = async (req: any, res: Response) => {
 
 
 // ✅ Load models once at server start
-import { loadFaceModels, loadImageFromBase64, loadImageFromUrl, getFaceSimilarity } from "../utils/face";
-
-import { Request, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
 import fetch from "node-fetch";
-import users from "@/models/users"; // your user model
+
 
 export const compareFaceController = async (req: Request, res: Response) => {
   try {
@@ -404,7 +400,8 @@ export const compareFaceController = async (req: Request, res: Response) => {
       email: user.email,
       authLevel: 2,
     };
-const JWT_SECRET = process.env.JWT_SECRET as string; const JWT_EXPIRES = process.env.JWT_EXPIRES_IN as string;
+const JWT_SECRET = process.env.JWT_SECRET as string; 
+const JWT_EXPIRES = process.env.JWT_EXPIRES_IN as string;
     const finalToken = jwt.sign( payload as object, JWT_SECRET as jwt.Secret, { expiresIn: JWT_EXPIRES, } as jwt.SignOptions );
 
     res.status(200).json({
