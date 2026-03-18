@@ -35,7 +35,7 @@ export const DashboardHome = () => {
         <span className="font-semibold">Email:</span> {user.email}
       </p>
       <p className="mb-2">
-        <span className="font-semibold">Email:</span> {user.username}
+        <span className="font-semibold">Username:</span> {user.username}
       </p>
       
       {/* <p className="mb-2">
