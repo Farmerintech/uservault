@@ -28,8 +28,8 @@ export const DashboardHome = () => {
 
   return (
     <div className="p-6 max-w-md mx-auto rounded-xl mt-10">
-      <h1 className="text-xl md:text-2xl font-bold mb-4 ">Welcome, {user.username} 👋</h1>
-       <div className="flex flex-col gap-5 border-1 border-gray-500">
+      <h1 className="md:text-2xl text-lg font-bold mb-4 ">Welcome, {user.username} 👋</h1>
+       <div className="flex flex-col gap-5 border-1 border-gray-500 shadow-md px-5 py-5 rounded-[12px] ">
          <img src ={user?.faceImage} className="w-[80px] h-[80px] rounded-full"/>
       <p className="mb-2">
         <span className="font-semibold">Email:</span> {user.email}
