@@ -346,9 +346,9 @@ export const deleteAllUsers = async (req: any, res: Response) => {
 
 
 // ✅ Load models once at server start
+
 import fetch from "node-fetch";
-
-
+import FormData from "form-data"; // Node.js version
 export const compareFaceController = async (req: Request, res: Response) => {
   try {
     const { image } = req.body;
@@ -362,27 +362,30 @@ export const compareFaceController = async (req: Request, res: Response) => {
       return res.status(403).json({ message: "Invalid authentication stage" });
     }
 
-    // Get user from DB
     const user = await users.findById(decoded.id);
     if (!user || !user.faceImage) {
       return res.status(404).json({ message: "User face not found" });
     }
 
+    // Convert base64 to Buffer
     const base64ToBuffer = (base64: string) => {
-  // Remove data URI prefix if it exists
-  const matches = base64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
-  const data = matches ? matches[2] : base64;
-  return Buffer.from(data, "base64");
-};
-    // Call Luxand API
+      const matches = base64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+      const data = matches ? matches[2] : base64;
+      return Buffer.from(data, "base64");
+    };
+
+    // Node-form-data
     const formData = new FormData();
-    formData.append("photo1", base64ToBuffer(image), "photo1.jpg"); // user-uploaded base64 file or Buffer
-    formData.append("photo2", user.faceImage); // stored URL of user's face
+    formData.append("photo1", base64ToBuffer(image), { filename: "photo1.jpg" }); // <-- object for filename
+    formData.append("photo2", user.faceImage); // URL is fine as string
 
     const response = await fetch("https://api.luxand.cloud/photo/compare", {
       method: "POST",
-      headers: { token: process.env.LUXAND_API_KEY as string },
-      body: formData as any,
+      headers: {
+        token: process.env.LUXAND_API_KEY as string,
+        ...formData.getHeaders(), // Important for Node
+      },
+      body: formData,
     });
 
     const result = await response.json();
@@ -391,7 +394,7 @@ export const compareFaceController = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Face comparison failed" });
     }
 
-    const similarity = result.similarity * 100; // Luxand returns 0–1 sometimes
+    const similarity = result.similarity * 100;
     if (similarity <= 65) {
       return res.status(401).json({
         success: false,
@@ -400,15 +403,15 @@ export const compareFaceController = async (req: Request, res: Response) => {
       });
     }
 
-    // Success: generate new token with authLevel 2
     const payload: JwtPayload = {
       id: user._id,
       email: user.email,
       authLevel: 2,
     };
 const JWT_SECRET = process.env.JWT_SECRET as string; 
-const JWT_EXPIRES = process.env.JWT_EXPIRES_IN as string;
-    const finalToken = jwt.sign( payload as object, JWT_SECRET as jwt.Secret, { expiresIn: JWT_EXPIRES, } as jwt.SignOptions );
+const JWT_EXPIRES = process.env.JWT_EXPIRES_IN as string; 
+const finalToken = jwt.sign( payload as object, JWT_SECRET as jwt.Secret, 
+  { expiresIn: JWT_EXPIRES, } as jwt.SignOptions );
 
     res.status(200).json({
       success: true,
