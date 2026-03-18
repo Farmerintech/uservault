@@ -348,77 +348,78 @@ export const deleteAllUsers = async (req: any, res: Response) => {
 // ✅ Load models once at server start
 import { loadFaceModels, loadImageFromBase64, loadImageFromUrl, getFaceSimilarity } from "../utils/face";
 
-export const compareFaceController = async (req:Request, res:Response) => {
+import { Request, Response } from "express";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import fetch from "node-fetch";
+import users from "@/models/users"; // your user model
+
+export const compareFaceController = async (req: Request, res: Response) => {
   try {
     const { image } = req.body;
+    if (!image) return res.status(400).json({ message: "Image required" });
 
-    if ( !image) return res.status(400).json({ message: "Email and image required" });
     const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-     const decoded: any = jwt.verify(
-      token,
-      process.env.JWT_SECRET as string
-    );
+    if (!token) return res.status(401).json({ message: "Unauthorized" });
 
-    // Must be authLevel 1
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
     if (decoded.authLevel !== 1) {
-      return res.status(403).json({
-        message: "Invalid authentication stage",
-      });
+      return res.status(403).json({ message: "Invalid authentication stage" });
     }
-    // Load models first
-    await loadFaceModels();
 
+    // Get user from DB
     const user = await users.findById(decoded.id);
     if (!user || !user.faceImage) {
-      return res.status(404).json({
-        message: "User face not found",
-      });
+      return res.status(404).json({ message: "User face not found" });
     }
-    const img1 = await loadImageFromBase64(image);
-    const img2 = await loadImageFromUrl(user.faceImage);
 
-    const similarity = await getFaceSimilarity(img1, img2);
-     if (similarity <= 65) {
+    // Call Luxand API
+    const formData = new FormData();
+    formData.append("photo1", image, "photo1.jpg"); // user-uploaded base64 file or Buffer
+    formData.append("photo2", user.faceImage); // stored URL of user's face
+
+    const response = await fetch("https://api.luxand.cloud/photo/compare", {
+      method: "POST",
+      headers: { token: process.env.LUXAND_API_KEY as string },
+      body: formData as any,
+    });
+
+    const result = await response.json();
+
+    if (!result.similarity) {
+      return res.status(400).json({ message: "Face comparison failed" });
+    }
+
+    const similarity = result.similarity * 100; // Luxand returns 0–1 sometimes
+    if (similarity <= 65) {
       return res.status(401).json({
         success: false,
-        message: `Face verification failed ${similarity}`,
-        verified: similarity > 55,
+        message: `Face verification failed. Similarity: ${similarity.toFixed(2)}%`,
+        verified: false,
       });
     }
+
+    // Success: generate new token with authLevel 2
     const payload: JwtPayload = {
       id: user._id,
-      email:user.email,
+      email: user.email,
       authLevel: 2,
     };
-    /* ---------- GENERATE TOKEN ---------- */
-   const JWT_SECRET = process.env.JWT_SECRET as string;
-   const JWT_EXPIRES = process.env.JWT_EXPIRES_IN as string;
+const JWT_SECRET = process.env.JWT_SECRET as string; const JWT_EXPIRES = process.env.JWT_EXPIRES_IN as string;
+    const finalToken = jwt.sign( payload as object, JWT_SECRET as jwt.Secret, { expiresIn: JWT_EXPIRES, } as jwt.SignOptions );
 
-   const finalToken = jwt.sign(
-  payload as object,
-  JWT_SECRET as jwt.Secret,
-  {
-    expiresIn: JWT_EXPIRES,
-  } as jwt.SignOptions
-);
-
-    /* ---------- RESPONSE ---------- */
     res.status(200).json({
       success: true,
-      message: "Login successful",
-      token,
+      message: "Face verification successful",
+      token: finalToken,
       user: {
         id: user._id,
         username: user.username,
         email: user.email,
-        token:finalToken
       },
+      similarity: similarity.toFixed(2),
     });
 
-  } catch (err:any) {
+  } catch (err: any) {
     console.error(err);
     return res.status(500).json({ message: err.message });
   }
