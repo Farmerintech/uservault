@@ -470,6 +470,8 @@ const finalToken = jwt.sign( payload as object, JWT_SECRET as jwt.Secret, { expi
         id: user._id,
         username: user.username,
         email: user.email,
+              token: finalToken,
+
       },
       similarity: similarity.toFixed(2),
       luxandResult: result,
