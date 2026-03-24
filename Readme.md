@@ -1,31 +1,30 @@
 
-
 ---
 
 # 🔐 Secure Cloud User Authentication System
 
 ## Undergraduate Research Project
 
-A secure, scalable cloud-based user authentication and file management system built with **Node.js**, **Express**, **MongoDB**, and **TypeScript**.
+A secure, scalable cloud-based user authentication and file management system built with **Node.js**, **Express** for backend, **MongoDB** for Database, and **React ** & **TypeScript** for frontend.
 
-This project was developed as part of an undergraduate research study focused on designing and implementing a **secure authentication architecture suitable for cloud environments**.
+This project was developed as part of an undergraduate research study focused on designing and implementing a **secure authentication architecture suitable for cloud environments**, integrating **facial biometric verification** using **Luxand Cloud API**.
 
 ---
 
 # 📌 Abstract
 
-As cloud-based systems continue to grow, secure user authentication has become a critical challenge. Many applications suffer from weak password storage, unverified email accounts, token misuse, and insecure password recovery flows.
+As cloud-based systems continue to grow, secure user authentication has become a critical challenge. Many applications suffer from weak password storage, unverified accounts, and reliance on single-layer authentication mechanisms.
 
-This project presents a secure authentication framework that implements:
+This project presents a **multi-layer authentication framework** that combines:
 
 * Password salting and hashing using bcrypt
 * Email verification via OTP
-* JWT-based authorization
+* **Facial biometric capture and verification (Luxand Cloud)**
+* JWT-based authorization (JSON_WEB_TOKEN)
 * Encrypted password reset links
 * Middleware-protected routes
-* User-scoped file management
 
-The system demonstrates practical implementation of secure authentication best practices for cloud applications.
+The system ensures that **user identity is verified using both knowledge (password) and biometrics (face)** before access is granted.
 
 ---
 
@@ -36,31 +35,31 @@ Many web and cloud applications face the following security problems:
 1. ❌ Plain-text password storage
 2. ❌ Weak hashing algorithms
 3. ❌ No email ownership verification
-4. ❌ Insecure password reset mechanisms
+4. ❌ Single-factor authentication (password only)
 5. ❌ Unprotected API endpoints
-6. ❌ Token hijacking risks
+6. ❌ Unauthorized access risks
 
 These vulnerabilities expose users to:
 
 * Account takeover attacks
-* Brute force attacks
-* Credential stuffing
-* Database breaches
-* Unauthorized access to cloud resources
+* Credential theft
+* Unauthorized system access
+* Data breaches
 
-This research project aims to design and implement a secure authentication system that mitigates these vulnerabilities.
+This project addresses these issues by implementing a **secure multi-factor authentication system using facial recognition**.
 
 ---
 
 # 🧠 Research Objectives
 
-* Design a secure user authentication architecture
+* Design a secure authentication architecture
 * Implement password hashing with salting
-* Enforce email verification before account activation
-* Secure password reset flow with encrypted tokens
-* Implement JWT-based stateless authentication
+* Enforce email verification before activation
+* Capture and store facial biometric data at registration
+* Implement facial verification during login
+* Integrate Luxand Cloud for face recognition
+* Implement JWT-based authentication
 * Protect API routes using middleware
-* Demonstrate secure cloud-ready authentication workflow
 
 ---
 
@@ -69,22 +68,41 @@ This research project aims to design and implement a secure authentication syste
 The system consists of:
 
 * Authentication Module
+* Biometric Verification Module (Luxand Cloud)
 * User Management Module
 * File Management Module
 * Middleware Layer
 * Email Service Layer
 * MongoDB Database
 
-Authentication flow:
+---
 
-1. User registers
+# 🔄 Authentication Flow (Exact System Flow)
+
+### 📝 Registration Phase
+
+1. User registers (email + password)
 2. Password is salted and hashed
 3. OTP is generated and sent to email
 4. User verifies email
-5. User logs in
-6. JWT token is issued
-7. Protected routes require JWT
-8. Password reset uses encrypted resetId
+5. **User face is captured and stored (via Luxand Cloud)**
+
+---
+
+### 🔐 Login Phase
+
+1. User inputs email and password
+2. System validates credentials
+
+   * ❌ Invalid → error → access denied
+3. **System captures a new face image during login**
+4. **Captured face is compared with stored face (Luxand Cloud)**
+
+   * ❌ Not matched → log attempt → error → access denied
+   * ✅ Match → proceed
+5. Authentication token (JWT) is generated
+6. Session is created and audit event is logged
+7. Access is granted
 
 ---
 
@@ -101,27 +119,15 @@ const hashedPassword = await bcrypt.hash(password, salt);
 
 ### Why Salting is Necessary
 
-A salt is a random value added to a password before hashing.
-
-Without salting:
-
-* Identical passwords produce identical hashes
-* Attackers can use rainbow tables
-
-With salting:
-
-* Each password hash is unique
-* Rainbow table attacks become ineffective
-* Brute-force becomes computationally expensive
+* Prevents identical password hashes
+* Protects against rainbow table attacks
+* Increases resistance to brute-force attacks
 
 ### Why bcrypt?
 
-bcrypt is preferred because:
-
-* It is adaptive (cost factor can increase over time)
-* It is resistant to brute-force attacks
-* It automatically handles salting internally
-* It is industry standard for password security
+* Adaptive hashing
+* Built-in salting
+* Industry standard
 
 ---
 
@@ -130,24 +136,95 @@ bcrypt is preferred because:
 After registration:
 
 * A 6-digit OTP is generated
-* OTP is stored temporarily in the database
-* OTP is sent to the user's email
-* User must verify before login
+* Sent to user's email
+* User must verify before account activation
 
-### Why Email Verification?
+### Benefits
 
 * Prevents fake accounts
-* Ensures email ownership
-* Reduces spam registrations
-* Improves system trustworthiness
-
-Account remains inactive until verified.
+* Ensures ownership of email
+* Improves system integrity
 
 ---
 
-## 3️⃣ JWT-Based Authentication
+## 3️⃣ Facial Biometric Authentication (Luxand Cloud)
 
-After successful login:
+### 📌 Registration (Face Capture)
+
+* User’s face is captured using device camera
+* Image is sent to **Luxand Cloud API**
+* A **face token / descriptor** is generated
+* Stored securely in the database
+
+---
+
+### 📌 Login (Face Verification)
+
+* A new face image is captured
+* Sent to Luxand Cloud
+* Compared against stored facial data
+
+---
+
+## 🧠 How Face Similarity Works
+
+Facial recognition systems like Luxand use **AI-based feature extraction**:
+
+1. The face image is analyzed
+
+2. Key facial landmarks are detected:
+
+   * Eyes
+   * Nose
+   * Mouth
+   * Jawline
+
+3. These features are converted into a **numerical vector (face embedding)**
+
+4. During login:
+
+   * New face → converted to embedding
+   * Stored face → already has embedding
+   * System computes **similarity score**
+
+---
+
+### 📊 Similarity Score
+
+* Value between **0 and 1** (or percentage)
+* Example:
+
+```
+0.95 → Very high match (same person)
+0.60 → Low confidence
+```
+
+---
+
+### ✅ Decision Rule
+
+```ts
+if (similarityScore >= 0.85) {
+  // Accept login
+} else {
+  // Reject login
+}
+```
+
+---
+
+### Why Facial Recognition?
+
+* Adds **biometric security layer**
+* Prevents unauthorized login even if password is stolen
+* Unique to each user
+* Hard to replicate
+
+---
+
+## 4️⃣ JWT-Based Authentication
+
+After successful authentication:
 
 ```ts
 const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -155,51 +232,48 @@ const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
 });
 ```
 
-### Why JWT?
+### Benefits
 
 * Stateless authentication
-* No server session storage required
 * Scalable for cloud systems
-* Easily integrated with frontend applications
-
-JWT is required for accessing protected routes:
-
-```http
-Authorization: Bearer <token>
-```
+* Secure API communication
 
 ---
 
-## 4️⃣ Secure Password Reset Mechanism
+## 5️⃣ Session Creation & Audit Logging
 
-Instead of exposing OTP directly:
+After login:
 
-* A reset OTP is generated
-* OTP is encrypted into a `resetId`
-* A password reset link is sent via email:
+* Session is created
+* Login activity is recorded
+
+### Why Important?
+
+* Tracks user activity
+* Helps detect suspicious behavior
+* Supports auditing
+
+---
+
+## 6️⃣ Secure Password Reset Mechanism
+
+* Reset OTP is generated
+* Encrypted into `resetId`
+* Sent via email
 
 ```
 https://yourfrontend.com/reset-password?resetId=encryptedToken
 ```
 
-When accessed:
+### Benefits
 
-* resetId is decrypted
-* OTP is validated
-* User sets new password
-
-### Why Encrypt resetId?
-
-* Prevents OTP exposure in URL
-* Prevents replay attacks
-* Ensures only intended user can reset password
+* Prevents OTP exposure
 * Protects against tampering
+* Ensures secure recovery
 
 ---
 
-## 5️⃣ Route Protection (Middleware)
-
-Protected routes use authentication middleware:
+## 7️⃣ Route Protection (Middleware)
 
 ```ts
 authMiddleWare
@@ -207,16 +281,9 @@ authMiddleWare
 
 Middleware:
 
-* Extracts token from header
-* Verifies JWT signature
-* Attaches user to request object
-* Denies unauthorized access
-
-This ensures only authenticated users can:
-
-* Access files
-* Update profile
-* Delete resources
+* Verifies JWT
+* Attaches user to request
+* Blocks unauthorized access
 
 ---
 
@@ -255,6 +322,7 @@ src/
 * TypeScript
 * bcrypt
 * JSON Web Token (JWT)
+* Luxand Cloud API (Facial Recognition)
 * Nodemailer / Resend
 
 ---
@@ -263,11 +331,11 @@ src/
 
 ✔ Password hashing with salt
 ✔ Email verification (OTP)
-✔ Encrypted password reset link
+✔ **Facial biometric authentication (Luxand Cloud)**
 ✔ JWT authentication
 ✔ Protected API routes
-✔ Environment variable protection
-✔ User-scoped file access
+✔ Encrypted password reset
+✔ Audit logging
 
 ---
 
@@ -276,9 +344,9 @@ src/
 ```bash
 git clone https://github.com/your-username/secure-cloud-user.git
 cd secure-cloud-user
-cd backend (for backend)
+cd backend
 npm install
-cd frontennd(for frontend)
+cd frontend
 npm install
 ```
 
@@ -290,6 +358,7 @@ MONGO_URI=your_mongo_uri
 JWT_SECRET=your_secret_key
 EMAIL_USER=your_email
 EMAIL_PASS=your_password
+LUXAND_API_KEY=your_luxand_key
 ```
 
 Run:
@@ -307,8 +376,8 @@ Future improvements may include:
 * Unit testing (Jest)
 * API testing (Supertest)
 * Rate limiting
-* Role-based access control
-* Multi-factor authentication (MFA)
+* Multi-factor authentication (OTP fallback)
+* Liveness detection (anti-spoofing)
 
 ---
 
@@ -316,33 +385,23 @@ Future improvements may include:
 
 This project demonstrates:
 
-* Practical implementation of secure authentication
-* Real-world mitigation of common vulnerabilities
-* Cloud-ready stateless architecture
-* Secure password lifecycle management
-
-It contributes to undergraduate research in:
-
-* Cloud security
-* Web authentication systems
-* Applied cryptography in web applications
+* Integration of **biometric authentication into cloud systems**
+* Practical implementation of **multi-factor security**
+* Secure identity verification using **AI-based facial recognition**
+* Cloud-ready authentication architecture
 
 ---
 
 # 📌 Conclusion
 
-The Secure Cloud User Authentication System successfully implements industry-standard authentication and security mechanisms.
+The Secure Cloud User Authentication System implements a **multi-layer authentication model** combining:
 
-By combining:
-
-* bcrypt hashing
-* Salting
-* OTP verification
-* Encrypted reset links
+* Password-based authentication
+* Facial biometric verification
 * JWT authorization
-* Middleware protection
+* Secure session handling
 
-The system provides a robust and secure authentication framework suitable for modern cloud applications.
+By verifying both **credentials and biometric identity**, the system ensures **high-level security suitable for modern cloud applications**.
 
 ---
 
@@ -351,6 +410,6 @@ The system provides a robust and secure authentication framework suitable for mo
 IDRIZ
 Undergraduate Research Project
 
-
 ---
+
 
